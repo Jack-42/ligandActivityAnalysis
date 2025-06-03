@@ -102,7 +102,6 @@ rule setup_user:
         "benchmark/setup_user/all.tsv"
     shell:
         """
-        sudo -i -u postgres && \
         psql -d {params.CHEMBL_DB_NAME} -c "CREATE ROLE {params.CHEMBL_DB_USER} WITH LOGIN PASSWORD '{params.CHEMBL_DB_PASSWORD}'" && \
         psql -d {params.CHEMBL_DB_NAME} -c "GRANT SELECT ON ALL TABLES IN SCHEMA public TO {params.CHEMBL_DB_USER}" && \
         psql -d {params.CHEMBL_DB_NAME} -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO {params.CHEMBL_DB_USER}" && \
