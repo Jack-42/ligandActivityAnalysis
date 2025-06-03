@@ -1,2 +1,11 @@
+# ChEMBL FILES
+# NOTE: to update ChEMBL version just change "35" to desired version
 CHEMBL_POSTGRES_DB_LINK: "https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/latest/chembl_35_postgresql.tar.gz"
-CHEMBL_DB_FPATH: "/home/jack/unm_gra/data/chembl/chembl_35_postgresql.tar.gz"
+CHEMBL_LOCAL_DIR: "/media/jack/odisk/data/chembl/"
+
+# DB OPTIONS
+CHEMBL_DB_NAME: "chembl_35"
+CHEMBL_DB_HOST: "localhost"
+CHEMBL_DB_USER: "toad" # user will need admin privileges
+CHEMBL_DB_PASSWORD: "cookies"
+CHEMBL_DB_PORT: 5434
