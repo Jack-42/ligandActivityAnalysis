@@ -23,9 +23,21 @@ SETUP_DB_DONE_FILE = "logs/setup_db/done.txt"
 SETUP_USER_DONE_FILE = "logs/setup_user/done.txt"
 
 
+# want to make it easy to run workflow with different organism, target_type, etc
+# all other data depends on selected targets
+SUBDIR_NAME = "".join(
+    f"{config["ORGANISM"]}-{config["TARGET_TYPE"]}-{config["PROTEIN_CLASS_ID"]}".split()
+)
+DATA_SUBDIR = os.path.join(config["DATA_DIR"], SUBDIR_NAME)
+TARGET_DATA_DIR = os.path.join(DATA_SUBDIR, "targets")
+TARGET_TSV_FILE = os.path.join(TARGET_DATA_DIR, "target_info.tsv")
+FAMILY_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_info.tsv")
+
+
 rule all:
     input:
-        SETUP_USER_DONE_FILE,
+        TARGET_TSV_FILE,
+        FAMILY_TSV_FILE,
 
 
 rule download_chembl_files:
@@ -108,3 +120,37 @@ rule setup_user:
         psql -d {params.CHEMBL_DB_NAME} -c "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO {params.CHEMBL_DB_USER}" \
         > {log} 2>&1 
         """
+
+
+rule get_protein_targets:
+    input:
+        SETUP_USER_DONE_FILE,
+    output:
+        target_tsv_file=TARGET_TSV_FILE,
+        family_tsv_file=FAMILY_TSV_FILE,
+    params:
+        ORGANISM=config["ORGANISM"],
+        TARGET_TYPE=config["TARGET_TYPE"],
+        PROTEIN_CLASS_ID=config["PROTEIN_CLASS_ID"],
+        CHEMBL_DB_HOST=config["CHEMBL_DB_HOST"],
+        CHEMBL_DB_NAME=config["CHEMBL_DB_NAME"],
+        CHEMBL_DB_USER=config["CHEMBL_DB_USER"],
+        CHEMBL_DB_PASSWORD=config["CHEMBL_DB_PASSWORD"],
+        CHEMBL_DB_PORT=config["CHEMBL_DB_PORT"],
+    log:
+        "logs/get_protein_targets/all.log",
+    benchmark:
+        "benchmark/get_protein_targets/all.tsv"
+    shell:
+        "python src/get_protein_targets.py "
+        "--db_name '{params.CHEMBL_DB_NAME}' "
+        "--db_host '{params.CHEMBL_DB_HOST}' "
+        "--db_user '{params.CHEMBL_DB_USER}' "
+        "--db_password '{params.CHEMBL_DB_PASSWORD}' "
+        "--db_port {params.CHEMBL_DB_PORT} "
+        "--protein_class_id {params.PROTEIN_CLASS_ID} "
+        "--target_type '{params.TARGET_TYPE}' "
+        "--organism '{params.ORGANISM}' "
+        "--target_tsv_file '{output.target_tsv_file}' "
+        "--family_tsv_file '{output.family_tsv_file}' "
+        " > {log} 2>&1 "
