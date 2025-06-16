@@ -60,10 +60,11 @@ def get_target_info(
 ) -> list[int]:
     query = sql.SQL(
         """
-        SELECT td.tid, cc.protein_class_id
+        SELECT td.tid, cc.protein_class_id, cc.component_id, cs.accession
         FROM target_dictionary td
         JOIN target_components tc ON td.tid = tc.tid
         JOIN component_class cc ON tc.component_id = cc.component_id
+        JOIN component_sequences cs ON cc.component_id = cs.component_id
         WHERE cc.protein_class_id IN {protein_class_ids}
         AND ({organism} IS NULL OR td.organism = {organism})
         AND ({target_type} IS NULL OR td.target_type = {target_type});
@@ -183,7 +184,11 @@ def main():
     write_to_tsv(
         args.family_tsv_file, protein_class_relations, ["protein_class_id", "parent_id"]
     )
-    write_to_tsv(args.target_tsv_file, target_info, ["tid", "protein_class_id"])
+    write_to_tsv(
+        args.target_tsv_file,
+        target_info,
+        ["tid", "protein_class_id", "component_id", "accession"],
+    )
 
     # Close connections
     cursor.close()
