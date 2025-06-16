@@ -7,22 +7,14 @@ The script will return the TargetIDs (TID) of each protein belonging to the give
 """
 
 import argparse
-import csv
-import os
 from typing import Optional
 
 import psycopg2
 from psycopg2 import sql
 from psycopg2.extras import DictCursor
 
-
-def write_to_tsv(fpath: str, rows: list, header: list[str]) -> None:
-    os.makedirs(os.path.dirname(fpath), exist_ok=True)
-    with open(fpath, "w", newline="") as f:
-        writer = csv.writer(f, delimiter="\t")
-        writer.writerow(header)
-        for row in rows:
-            writer.writerow(row)
+from utils.args import add_chembl_db_args
+from utils.io import write_to_tsv
 
 
 def get_protein_class_relations(
@@ -85,40 +77,7 @@ def parse_args():
         description="Return the TargetIDs (TIDs) of proteins belonging to the given family, as well as protein family relation information (e.g., if the given family has subfamilies).",
         epilog="",
     )
-    parser.add_argument(
-        "--db_name",
-        type=str,
-        default=argparse.SUPPRESS,
-        required=True,
-        help="Name of ChEMBL PostgreSQL database",
-    )
-    parser.add_argument(
-        "--db_host",
-        type=str,
-        default="localhost",
-        help="Database host (default: %(default)s)",
-    )
-    parser.add_argument(
-        "--db_user",
-        type=str,
-        default=argparse.SUPPRESS,
-        required=True,
-        help="Database user",
-    )
-    parser.add_argument(
-        "--db_password",
-        type=str,
-        default=argparse.SUPPRESS,
-        required=True,
-        help="Database password",
-    )
-    parser.add_argument(
-        "--db_port",
-        type=int,
-        default=5432,
-        required=False,
-        help="Database port",
-    )
+    add_chembl_db_args(parser)
     parser.add_argument(
         "--protein_class_id",
         type=int,
