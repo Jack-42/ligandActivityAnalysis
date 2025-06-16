@@ -20,3 +20,4 @@ PROTEIN_CLASS_ID: 6 # 6 corresponds to kinase family - see protein_classificatio
 
 # ASSAY SELECTION
 ASSAY_TYPE: "B" # B=binding, see https://chembl.gitbook.io/chembl-interface-documentation/frequently-asked-questions/chembl-data-questions#what-is-the-assay-type
+CONFIDENCE_SCORE: 9

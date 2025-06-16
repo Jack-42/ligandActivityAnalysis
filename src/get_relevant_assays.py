@@ -45,23 +45,35 @@ def parse_args():
         default=None,
         help="(Optional) Filter by given assay_type",
     )
+    parser.add_argument(
+        "--confidence_score",
+        type=int,
+        required=False,
+        default=None,
+        help="(Optional) Filter by given confidence_score",
+    )
     args = parser.parse_args()
     return args
 
 
 def get_assays(
-    cursor: DictCursor, tids: list[int], assay_type: Optional[str] = None
+    cursor: DictCursor,
+    tids: list[int],
+    assay_type: Optional[str] = None,
+    confidence_score: Optional[int] = None,
 ) -> list[int]:
     query = sql.SQL(
         """
         SELECT assay_id, tid
         FROM assays
         WHERE tid IN {tids}
-        AND ({assay_type} IS NULL OR assay_type = {assay_type});
+        AND ({assay_type} IS NULL OR assay_type = {assay_type})
+        AND ({confidence_score} IS NULL OR confidence_score = {confidence_score});
         """
     ).format(
         tids=sql.Literal(tuple(tids)),
         assay_type=sql.Literal(assay_type),
+        confidence_score=sql.Literal(confidence_score),
     )
 
     cursor.execute(query)
