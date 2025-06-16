@@ -29,10 +29,12 @@ SUBDIR_NAME = "".join(
     f"{config["ORGANISM"]}-{config["TARGET_TYPE"]}-{config["PROTEIN_CLASS_ID"]}".split()
 )
 DATA_SUBDIR = os.path.join(config["DATA_DIR"], SUBDIR_NAME)
+FIGURES_DIR = os.path.join(DATA_SUBDIR, "figures")
 TARGET_DATA_DIR = os.path.join(DATA_SUBDIR, "targets")
 TARGET_TSV_FILE = os.path.join(TARGET_DATA_DIR, "target_info.tsv")
 FAMILY_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_info.tsv")
 ASSAYS_TSV_FILE = os.path.join(DATA_SUBDIR, "assays", "assay_info.tsv")
+APT_PNG_FILE = os.path.join(FIGURES_DIR, "assays_per_target.png")
 
 
 rule all:
@@ -40,6 +42,7 @@ rule all:
         TARGET_TSV_FILE,
         FAMILY_TSV_FILE,
         ASSAYS_TSV_FILE,
+        APT_PNG_FILE,
 
 
 rule download_chembl_files:
@@ -184,4 +187,20 @@ rule get_relevant_assays:
         "--target_tsv_file '{input.target_tsv_file}' "
         "--assay_tsv_file '{output.assay_tsv_file}' "
         "--assay_type '{params.ASSAY_TYPE}' "
+        " > {log} 2>&1 "
+
+
+rule plot_assays_per_target:
+    input:
+        assay_tsv_file=ASSAYS_TSV_FILE,
+    output:
+        out_path=APT_PNG_FILE,
+    log:
+        "logs/plot_assays_per_target/all.log",
+    benchmark:
+        "benchmark/plot_assays_per_target/all.tsv"
+    shell:
+        "python src/plotting/plot_assays_per_target.py "
+        "--assay_tsv_file '{input.assay_tsv_file}' "
+        "--out_path '{output.out_path}' "
         " > {log} 2>&1 "
