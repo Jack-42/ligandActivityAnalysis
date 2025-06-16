@@ -32,12 +32,14 @@ DATA_SUBDIR = os.path.join(config["DATA_DIR"], SUBDIR_NAME)
 TARGET_DATA_DIR = os.path.join(DATA_SUBDIR, "targets")
 TARGET_TSV_FILE = os.path.join(TARGET_DATA_DIR, "target_info.tsv")
 FAMILY_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_info.tsv")
+ASSAYS_TSV_FILE = os.path.join(DATA_SUBDIR, "assays", "assay_info.tsv")
 
 
 rule all:
     input:
         TARGET_TSV_FILE,
         FAMILY_TSV_FILE,
+        ASSAYS_TSV_FILE,
 
 
 rule download_chembl_files:
@@ -153,4 +155,33 @@ rule get_protein_targets:
         "--organism '{params.ORGANISM}' "
         "--target_tsv_file '{output.target_tsv_file}' "
         "--family_tsv_file '{output.family_tsv_file}' "
+        " > {log} 2>&1 "
+
+
+rule get_relevant_assays:
+    input:
+        target_tsv_file=TARGET_TSV_FILE,
+    output:
+        assay_tsv_file=ASSAYS_TSV_FILE,
+    params:
+        ASSAY_TYPE=config["ASSAY_TYPE"],
+        CHEMBL_DB_HOST=config["CHEMBL_DB_HOST"],
+        CHEMBL_DB_NAME=config["CHEMBL_DB_NAME"],
+        CHEMBL_DB_USER=config["CHEMBL_DB_USER"],
+        CHEMBL_DB_PASSWORD=config["CHEMBL_DB_PASSWORD"],
+        CHEMBL_DB_PORT=config["CHEMBL_DB_PORT"],
+    log:
+        "logs/get_relevant_assays/all.log",
+    benchmark:
+        "benchmark/get_relevant_assays/all.tsv"
+    shell:
+        "python src/get_relevant_assays.py "
+        "--db_name '{params.CHEMBL_DB_NAME}' "
+        "--db_host '{params.CHEMBL_DB_HOST}' "
+        "--db_user '{params.CHEMBL_DB_USER}' "
+        "--db_password '{params.CHEMBL_DB_PASSWORD}' "
+        "--db_port {params.CHEMBL_DB_PORT} "
+        "--target_tsv_file '{input.target_tsv_file}' "
+        "--assay_tsv_file '{output.assay_tsv_file}' "
+        "--assay_type '{params.ASSAY_TYPE}' "
         " > {log} 2>&1 "
