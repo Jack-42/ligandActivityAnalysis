@@ -13,6 +13,10 @@ dependencies:
   - appdirs=1.4.4=pyhd8ed1ab_1
   - argparse-dataclass=2.0.0=pyhd8ed1ab_0
   - attrs=25.3.0=pyh71513ae_0
+  - blas=2.131=openblas
+  - blas-devel=3.9.0=31_h1ea3ea9_openblas
+  - bottle=0.13.2=py312h06a4308_0
+  - brotli=1.0.9=he6710b0_2
   - brotli-python=1.1.0=py312h2ec8cdc_2
   - bzip2=1.0.8=h4bc722e_7
   - ca-certificates=2025.4.26=hbd8a1cb_0
@@ -34,6 +38,7 @@ dependencies:
   - docutils=0.21.2=pyhd8ed1ab_1
   - dpath=2.2.0=pyha770c72_0
   - eido=0.2.4=pyhd8ed1ab_0
+  - ete4=4.3.0=py312h66e93f0_0
   - exceptiongroup=1.3.0=pyhd8ed1ab_0
   - gitdb=4.0.12=pyhd8ed1ab_0
   - gitpython=3.1.44=pyhff2d567_0
@@ -59,6 +64,7 @@ dependencies:
   - libgcc=15.1.0=h767d61c_2
   - libgcc-ng=15.1.0=h69a702a_2
   - libgfortran=15.1.0=h69a702a_2
+  - libgfortran-ng=15.1.0=h69a702a_2
   - libgfortran5=15.1.0=hcea5267_2
   - libgomp=15.1.0=h767d61c_2
   - liblapack=3.9.0=31_h7ac8fdf_openblas
@@ -80,6 +86,7 @@ dependencies:
   - nbformat=5.10.4=pyhd8ed1ab_1
   - ncurses=6.5=h2d0b736_3
   - numpy=2.2.6=py312h72c5963_0
+  - openblas=0.3.29=pthreads_h6ec200e_0
   - openldap=2.6.4=h42fbc30_0
   - openssl=3.5.0=h7b32b05_1
   - packaging=25.0=pyh29332c3_1
@@ -114,6 +121,7 @@ dependencies:
   - reretry=0.11.8=pyhd8ed1ab_1
   - rich=14.0.0=pyh29332c3_0
   - rpds-py=0.25.1=py312h680f630_0
+  - scipy=1.15.3=py312h5e4e545_0
   - setuptools=80.9.0=pyhff2d567_0
   - shellingham=1.5.4=pyhd8ed1ab_1
   - six=1.17.0=pyhd8ed1ab_0
