@@ -33,6 +33,7 @@ FIGURES_DIR = os.path.join(DATA_SUBDIR, "figures")
 TARGET_DATA_DIR = os.path.join(DATA_SUBDIR, "targets")
 TARGET_TSV_FILE = os.path.join(TARGET_DATA_DIR, "target_info.tsv")
 FAMILY_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_info.tsv")
+FAMILY_DETAILS_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_addl_info.tsv")
 ASSAYS_TSV_FILE = os.path.join(DATA_SUBDIR, "assays", "assay_info.tsv")
 ACTIVITIES_TSV_FILE = os.path.join(DATA_SUBDIR, "activities", "activity_info.tsv")
 APT_PNG_FILE = os.path.join(FIGURES_DIR, "assays_per_target.png")
@@ -42,6 +43,7 @@ rule all:
     input:
         APT_PNG_FILE,
         ACTIVITIES_TSV_FILE,
+        FAMILY_DETAILS_TSV_FILE,
 
 
 rule download_chembl_files:
@@ -157,6 +159,33 @@ rule get_protein_targets:
         "--organism '{params.ORGANISM}' "
         "--target_tsv_file '{output.target_tsv_file}' "
         "--family_tsv_file '{output.family_tsv_file}' "
+        " > {log} 2>&1 "
+
+
+rule get_addl_family_info:
+    input:
+        family_tsv_file=FAMILY_TSV_FILE,
+    output:
+        family_details_tsv_file=FAMILY_DETAILS_TSV_FILE,
+    params:
+        CHEMBL_DB_HOST=config["CHEMBL_DB_HOST"],
+        CHEMBL_DB_NAME=config["CHEMBL_DB_NAME"],
+        CHEMBL_DB_USER=config["CHEMBL_DB_USER"],
+        CHEMBL_DB_PASSWORD=config["CHEMBL_DB_PASSWORD"],
+        CHEMBL_DB_PORT=config["CHEMBL_DB_PORT"],
+    log:
+        "logs/get_addl_family_info/all.log",
+    benchmark:
+        "benchmark/get_addl_family_info/all.tsv"
+    shell:
+        "python src/get_addl_family_info.py "
+        "--db_name '{params.CHEMBL_DB_NAME}' "
+        "--db_host '{params.CHEMBL_DB_HOST}' "
+        "--db_user '{params.CHEMBL_DB_USER}' "
+        "--db_password '{params.CHEMBL_DB_PASSWORD}' "
+        "--db_port {params.CHEMBL_DB_PORT} "
+        "--family_tsv_file '{input.family_tsv_file}' "
+        "--family_details_tsv_file '{output.family_details_tsv_file}' "
         " > {log} 2>&1 "
 
 
