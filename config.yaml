@@ -24,5 +24,5 @@ CONFIDENCE_SCORE: 9
 DOC_TYPE: "PUBLICATION" # only take assays associated w/ a publication
 
 # LIGAND SELECTION
-MIN_PCHEMBL_VALUE: 5 # potency threshold
+PCHEMBL_MIN_VALUE: 7.52 # potency threshold, defined as -log_10(measured val) M: >= 7.52 is same as <= 30nM
 

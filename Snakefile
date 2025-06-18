@@ -34,15 +34,14 @@ TARGET_DATA_DIR = os.path.join(DATA_SUBDIR, "targets")
 TARGET_TSV_FILE = os.path.join(TARGET_DATA_DIR, "target_info.tsv")
 FAMILY_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_info.tsv")
 ASSAYS_TSV_FILE = os.path.join(DATA_SUBDIR, "assays", "assay_info.tsv")
+ACTIVITIES_TSV_FILE = os.path.join(DATA_SUBDIR, "activities", "activity_info.tsv")
 APT_PNG_FILE = os.path.join(FIGURES_DIR, "assays_per_target.png")
 
 
 rule all:
     input:
-        TARGET_TSV_FILE,
-        FAMILY_TSV_FILE,
-        ASSAYS_TSV_FILE,
         APT_PNG_FILE,
+        ACTIVITIES_TSV_FILE,
 
 
 rule download_chembl_files:
@@ -207,4 +206,33 @@ rule plot_assays_per_target:
         "python src/plotting/plot_assays_per_target.py "
         "--assay_tsv_file '{input.assay_tsv_file}' "
         "--out_path '{output.out_path}' "
+        " > {log} 2>&1 "
+
+
+rule get_active_compounds:
+    input:
+        assay_tsv_file=ASSAYS_TSV_FILE,
+    output:
+        activities_tsv_file=ACTIVITIES_TSV_FILE,
+    params:
+        PCHEMBL_MIN_VALUE=config["PCHEMBL_MIN_VALUE"],
+        CHEMBL_DB_HOST=config["CHEMBL_DB_HOST"],
+        CHEMBL_DB_NAME=config["CHEMBL_DB_NAME"],
+        CHEMBL_DB_USER=config["CHEMBL_DB_USER"],
+        CHEMBL_DB_PASSWORD=config["CHEMBL_DB_PASSWORD"],
+        CHEMBL_DB_PORT=config["CHEMBL_DB_PORT"],
+    log:
+        "logs/get_active_compounds/all.log",
+    benchmark:
+        "benchmark/get_active_compounds/all.tsv"
+    shell:
+        "python src/get_active_compounds.py "
+        "--db_name '{params.CHEMBL_DB_NAME}' "
+        "--db_host '{params.CHEMBL_DB_HOST}' "
+        "--db_user '{params.CHEMBL_DB_USER}' "
+        "--db_password '{params.CHEMBL_DB_PASSWORD}' "
+        "--db_port {params.CHEMBL_DB_PORT} "
+        "--assay_tsv_file '{input.assay_tsv_file}' "
+        "--pchembl_min_value {params.PCHEMBL_MIN_VALUE} "
+        "--activities_tsv_file '{output.activities_tsv_file}' "
         " > {log} 2>&1 "
