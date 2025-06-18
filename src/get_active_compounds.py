@@ -19,7 +19,7 @@ from utils.io import write_to_tsv
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Return the TargetIDs (TIDs) of proteins belonging to the given family, as well as protein family relation information (e.g., if the given family has subfamilies).",
+        description="Fetch the IDs of compounds deemed active in the given assays.",
         epilog="",
     )
     add_chembl_db_args(parser)
