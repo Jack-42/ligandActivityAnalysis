@@ -46,6 +46,13 @@ def parse_args():
         help="(Optional) Filter by given assay_type",
     )
     parser.add_argument(
+        "--doc_type",
+        type=str,
+        required=False,
+        default=None,
+        help="(Optional) Filter to only include assays associated with the given doc_type",
+    )
+    parser.add_argument(
         "--confidence_score",
         type=int,
         required=False,
@@ -61,19 +68,23 @@ def get_assays(
     tids: list[int],
     assay_type: Optional[str] = None,
     confidence_score: Optional[int] = None,
+    doc_type: Optional[str] = None,
 ) -> list[int]:
     query = sql.SQL(
         """
         SELECT assay_id, tid
-        FROM assays
+        FROM assays ass
+        JOIN docs d ON ass.doc_id = d.doc_id
         WHERE tid IN {tids}
         AND ({assay_type} IS NULL OR assay_type = {assay_type})
-        AND ({confidence_score} IS NULL OR confidence_score = {confidence_score});
+        AND ({confidence_score} IS NULL OR confidence_score = {confidence_score})
+        AND ({doc_type} IS NULL OR d.doc_type = {doc_type});
         """
     ).format(
         tids=sql.Literal(tuple(tids)),
         assay_type=sql.Literal(assay_type),
         confidence_score=sql.Literal(confidence_score),
+        doc_type=sql.Literal(doc_type),
     )
 
     cursor.execute(query)

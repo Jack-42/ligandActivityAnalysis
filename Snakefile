@@ -168,6 +168,7 @@ rule get_relevant_assays:
         assay_tsv_file=ASSAYS_TSV_FILE,
     params:
         ASSAY_TYPE=config["ASSAY_TYPE"],
+        DOC_TYPE=config["DOC_TYPE"],
         CONFIDENCE_SCORE=config["CONFIDENCE_SCORE"],
         CHEMBL_DB_HOST=config["CHEMBL_DB_HOST"],
         CHEMBL_DB_NAME=config["CHEMBL_DB_NAME"],
@@ -189,6 +190,7 @@ rule get_relevant_assays:
         "--assay_tsv_file '{output.assay_tsv_file}' "
         "--assay_type '{params.ASSAY_TYPE}' "
         "--confidence_score {params.CONFIDENCE_SCORE} "
+        "--doc_type '{params.DOC_TYPE}' "
         " > {log} 2>&1 "
 
 
