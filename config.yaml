@@ -25,4 +25,5 @@ DOC_TYPE: "PUBLICATION" # only take assays associated w/ a publication
 
 # LIGAND SELECTION
 PCHEMBL_MIN_VALUE: 7.52 # potency threshold, defined as -log_10(measured val) M: >= 7.52 is same as <= 30nM
-
+MIN_MW: 200 # minimum molecular weight in Da
+MAX_MW: 900 # maximum ''

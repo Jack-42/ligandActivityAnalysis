@@ -264,6 +264,8 @@ rule get_active_compounds:
         activities_tsv_file=ACTIVITIES_TSV_FILE,
     params:
         PCHEMBL_MIN_VALUE=config["PCHEMBL_MIN_VALUE"],
+        MIN_MW=config["MIN_MW"],
+        MAX_MW=config["MAX_MW"],
         CHEMBL_DB_HOST=config["CHEMBL_DB_HOST"],
         CHEMBL_DB_NAME=config["CHEMBL_DB_NAME"],
         CHEMBL_DB_USER=config["CHEMBL_DB_USER"],
@@ -283,4 +285,6 @@ rule get_active_compounds:
         "--assay_tsv_file '{input.assay_tsv_file}' "
         "--pchembl_min_value {params.PCHEMBL_MIN_VALUE} "
         "--activities_tsv_file '{output.activities_tsv_file}' "
+        "--min_mw {params.MIN_MW} "
+        "--max_mw {params.MAX_MW} "
         " > {log} 2>&1 "

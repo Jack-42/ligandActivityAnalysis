@@ -43,28 +43,49 @@ def parse_args():
         default=5.0,
         help="Minimum activity threshold (defined by pchembl_value)",
     )
+    parser.add_argument(
+        "--min_mw",
+        type=float,
+        default=200.0,
+        help="Minimum full molecular weight of selected compounds (in Da)",
+    )
+    parser.add_argument(
+        "--max_mw",
+        type=float,
+        default=900.0,
+        help="Maximum full molecular weight of selected compounds (in Da)",
+    )
     args = parser.parse_args()
     return args
 
 
 def get_active_mol_info(
-    cursor: DictCursor, assay_ids: list[int], pchembl_min_value: int
+    cursor: DictCursor,
+    assay_ids: list[int],
+    pchembl_min_value: int,
+    min_mw: float,
+    max_mw: float,
 ) -> list[int]:
     query = sql.SQL(
         """
         SELECT md.molregno,md.chembl_id,a.assay_id,a.standard_type,a.pchembl_value
         FROM activities a
         JOIN molecule_dictionary md ON a.molregno = md.molregno
+        JOIN compound_properties cp ON a.molregno = cp.molregno
         WHERE a.assay_id IN {assay_ids}
         AND a.pchembl_value >= {pchembl_min_value}
         AND a.relation = '='
         AND a.standard_flag = 1
         AND md.structure_type = 'MOL'
-        AND (a.data_validity_comment IS NULL OR a.data_validity_comment = 'Manually validated');
+        AND (a.data_validity_comment IS NULL OR a.data_validity_comment = 'Manually validated')
+        AND (cp.full_mwt >= {min_mw})
+        AND (cp.full_mwt <= {max_mw});
         """
     ).format(
         assay_ids=sql.Literal(tuple(assay_ids)),
         pchembl_min_value=sql.Literal(pchembl_min_value),
+        min_mw=sql.Literal(min_mw),
+        max_mw=sql.Literal(max_mw),
     )
     cursor.execute(query)
     result = cursor.fetchall()
@@ -86,7 +107,9 @@ def main():
 
     df = pl.read_csv(args.assay_tsv_file, separator="\t")
     assay_ids = list(df["assay_id"])
-    mol_info = get_active_mol_info(cursor, assay_ids, args.pchembl_min_value)
+    mol_info = get_active_mol_info(
+        cursor, assay_ids, args.pchembl_min_value, args.min_mw, args.max_mw
+    )
     header = ["molregno", "chembl_id", "assay_id", "standard_type", "pchembl_value"]
     write_to_tsv(args.activities_tsv_file, mol_info, header)
 
