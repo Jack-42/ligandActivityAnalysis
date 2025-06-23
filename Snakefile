@@ -26,7 +26,7 @@ SETUP_USER_DONE_FILE = "logs/setup_user/done.txt"
 # want to make it easy to run workflow with different organism, target_type, etc
 # all other data depends on selected targets
 SUBDIR_NAME = "".join(
-    f"{config["ORGANISM"]}-{config["TARGET_TYPE"]}-{config["PROTEIN_CLASS_ID"]}".split()
+    f'{config["ORGANISM"]}-{config["TARGET_TYPE"]}-{config["PROTEIN_CLASS_ID"]}'.split()
 )
 DATA_SUBDIR = os.path.join(config["DATA_DIR"], SUBDIR_NAME)
 FIGURES_DIR = os.path.join(DATA_SUBDIR, "figures")
@@ -37,6 +37,7 @@ FAMILY_DETAILS_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_addl_info.tsv")
 ASSAYS_TSV_FILE = os.path.join(DATA_SUBDIR, "assays", "assay_info.tsv")
 ACTIVITIES_TSV_FILE = os.path.join(DATA_SUBDIR, "activities", "activity_info.tsv")
 APT_PNG_FILE = os.path.join(FIGURES_DIR, "assays_per_target.png")
+FAMILY_TREE_PNG_FILE = os.path.join(FIGURES_DIR, "protein_family_tree.png")
 
 
 rule all:
@@ -44,6 +45,7 @@ rule all:
         APT_PNG_FILE,
         ACTIVITIES_TSV_FILE,
         FAMILY_DETAILS_TSV_FILE,
+        FAMILY_TREE_PNG_FILE,
 
 
 rule download_chembl_files:
@@ -235,6 +237,23 @@ rule plot_assays_per_target:
         "python src/plotting/plot_assays_per_target.py "
         "--assay_tsv_file '{input.assay_tsv_file}' "
         "--out_path '{output.out_path}' "
+        " > {log} 2>&1 "
+
+
+rule visualize_protein_family_tree:
+    input:
+        family_details_tsv_file=FAMILY_DETAILS_TSV_FILE,
+    output:
+        out_path=FAMILY_TREE_PNG_FILE,
+    log:
+        "logs/visualize_protein_family_tree/all.log",
+    benchmark:
+        "benchmark/visualize_protein_family_tree/all.tsv"
+    shell:
+        "python src/visualize_protein_family_tree.py "
+        "--family_details_tsv_file '{input.family_details_tsv_file}' "
+        "--out_path '{output.out_path}' "
+        "--interactive_mode "
         " > {log} 2>&1 "
 
 
