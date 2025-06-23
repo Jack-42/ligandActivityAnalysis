@@ -9,7 +9,7 @@ all assays exploring activity of the given targets.
 import argparse
 from typing import Optional
 
-import pandas as pd
+import polars as pl
 import psycopg2
 from psycopg2 import sql
 from psycopg2.extras import DictCursor
@@ -105,7 +105,7 @@ def main():
     connection.set_session(readonly=True)
     cursor = connection.cursor()
 
-    target_df = pd.read_csv(args.target_tsv_file, sep="\t")
+    target_df = pl.read_csv(args.target_tsv_file, separator="\t")
     tids = list(set(target_df["tid"]))
     assays = get_assays(cursor, tids, args.assay_type)
     write_to_tsv(args.assay_tsv_file, assays, ["assay_id", "tid"])

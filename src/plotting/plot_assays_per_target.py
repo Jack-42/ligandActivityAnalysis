@@ -9,7 +9,7 @@ assays per target.
 import argparse
 
 import matplotlib.pyplot as plt
-import pandas as pd
+import polars as pl
 import seaborn as sns
 
 
@@ -38,8 +38,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    df = pd.read_csv(args.assay_tsv_file, sep="\t")
-    n_a_per_t = df["tid"].value_counts().values
+    df = pl.read_csv(args.assay_tsv_file, separator="\t")
+    n_a_per_t = df["tid"].value_counts()["count"]
     sns.histplot(n_a_per_t)
     plt.title("Number of Unique Assay Records per Target")
     plt.xlabel("N. Unique Assays")

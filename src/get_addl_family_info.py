@@ -10,7 +10,7 @@ separate allows for greater flexibility in future (if need be).
 
 import argparse
 
-import pandas as pd
+import polars as pl
 import psycopg2
 from psycopg2 import sql
 from psycopg2.extras import DictCursor
@@ -70,7 +70,7 @@ def main():
     connection.set_session(readonly=True)
     cursor = connection.cursor()
 
-    df = pd.read_csv(args.family_tsv_file, sep="\t")
+    df = pl.read_csv(args.family_tsv_file, separator="\t")
     protein_class_ids = list(df["protein_class_id"])
     family_details = get_addl_info(cursor, protein_class_ids)
     write_to_tsv(

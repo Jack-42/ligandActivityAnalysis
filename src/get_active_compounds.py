@@ -8,7 +8,7 @@ meet the given criteria for being "active".
 
 import argparse
 
-import pandas as pd
+import polars as pl
 import psycopg2
 from psycopg2 import sql
 from psycopg2.extras import DictCursor
@@ -84,7 +84,7 @@ def main():
     connection.set_session(readonly=True)
     cursor = connection.cursor()
 
-    df = pd.read_csv(args.assay_tsv_file, sep="\t")
+    df = pl.read_csv(args.assay_tsv_file, separator="\t")
     assay_ids = list(df["assay_id"])
     mol_info = get_active_mol_info(cursor, assay_ids, args.pchembl_min_value)
     header = ["molregno", "chembl_id", "assay_id", "standard_type", "pchembl_value"]
