@@ -35,3 +35,8 @@ query targetLigands {
   }
 }
 ```
+
+## KinMap
+
+Resource which could be useful as an additional reference:
+http://kinhub.org/kinmap/index.html
