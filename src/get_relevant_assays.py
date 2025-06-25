@@ -75,7 +75,7 @@ def get_assays(
     confidence_score: Optional[int] = None,
     doc_type: Optional[str] = None,
     exclude_variants: bool = False,
-) -> list[int]:
+) -> list[list]:
     query = sql.SQL(
         """
         SELECT assay_id, tid

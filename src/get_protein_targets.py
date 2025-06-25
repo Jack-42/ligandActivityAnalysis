@@ -20,7 +20,7 @@ from utils.io import write_to_tsv
 def get_protein_class_relations(
     cursor: DictCursor,
     protein_class_id: int,
-) -> list[int]:
+) -> list[list]:
     # Fetch protein_class_id(s) which are or fall under given ID + their parents
     query = sql.SQL(
         """
