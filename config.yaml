@@ -28,7 +28,4 @@ EXCLUDE_VARIANTS: TRUE # exclude assays looking at variant rather than wild-type
 PCHEMBL_MIN_VALUE: 7.52 # potency threshold, defined as -log_10(measured val) M: >= 7.52 is same as <= 30nM
 MIN_MW: 200 # minimum molecular weight in Da
 MAX_MW: 900 # maximum ''
-STRUCTURAL_ALERT_SET_IDS:
-  4: # 4=PAINS
-  # see structural_alert_sets in ChEMBL DB
-  # molecules will be filtered out if the match any of the given set(s)
+STRUCTURAL_ALERT_SET_IDS: "4" # can provide list like "1,2,3,4".  4=PAINS, see structural_alert_sets table

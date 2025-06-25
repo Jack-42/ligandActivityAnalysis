@@ -28,7 +28,6 @@ CHEMBL_DB_DMP_FPATH = os.path.join(
 SETUP_DB_DONE_FILE = "logs/setup_db/done.txt"
 SETUP_USER_DONE_FILE = "logs/setup_user/done.txt"
 
-
 # want to make it easy to run workflow with different organism, target_type, etc
 # all other data depends on selected targets
 SUBDIR_NAME = "".join(
@@ -274,6 +273,7 @@ rule get_active_compounds:
         PCHEMBL_MIN_VALUE=config["PCHEMBL_MIN_VALUE"],
         MIN_MW=config["MIN_MW"],
         MAX_MW=config["MAX_MW"],
+        STRUCTURAL_ALERT_SET_IDS=config["STRUCTURAL_ALERT_SET_IDS"],
         CHEMBL_DB_HOST=config["CHEMBL_DB_HOST"],
         CHEMBL_DB_NAME=config["CHEMBL_DB_NAME"],
         CHEMBL_DB_USER=config["CHEMBL_DB_USER"],
@@ -295,4 +295,5 @@ rule get_active_compounds:
         "--activities_tsv_file '{output.activities_tsv_file}' "
         "--min_mw {params.MIN_MW} "
         "--max_mw {params.MAX_MW} "
+        "--structural_alert_set_ids {params.STRUCTURAL_ALERT_SET_IDS} "
         " > {log} 2>&1 "
