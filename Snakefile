@@ -41,6 +41,9 @@ FAMILY_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_info.tsv")
 FAMILY_DETAILS_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_addl_info.tsv")
 ASSAYS_TSV_FILE = os.path.join(DATA_SUBDIR, "assays", "assay_info.tsv")
 ACTIVITIES_TSV_FILE = os.path.join(DATA_SUBDIR, "activities", "activity_info.tsv")
+COMPOUND_STRUCTURES_TSV_FILE = os.path.join(
+    DATA_SUBDIR, "compound_structures", "structure_info.tsv"
+)
 APT_PNG_FILE = os.path.join(FIGURES_DIR, "assays_per_target.png")
 FAMILY_TREE_PNG_FILE = os.path.join(FIGURES_DIR, "protein_family_tree.png")
 
@@ -49,6 +52,7 @@ rule all:
     input:
         APT_PNG_FILE,
         ACTIVITIES_TSV_FILE,
+        COMPOUND_STRUCTURES_TSV_FILE,
         FAMILY_DETAILS_TSV_FILE,
         FAMILY_TREE_PNG_FILE,
 
@@ -296,4 +300,31 @@ rule get_active_compounds:
         "--min_mw {params.MIN_MW} "
         "--max_mw {params.MAX_MW} "
         "--structural_alert_set_ids {params.STRUCTURAL_ALERT_SET_IDS} "
+        " > {log} 2>&1 "
+
+
+rule get_compound_structures:
+    input:
+        activities_tsv_file=ACTIVITIES_TSV_FILE,
+    output:
+        compound_structures_tsv_file=COMPOUND_STRUCTURES_TSV_FILE,
+    params:
+        CHEMBL_DB_HOST=config["CHEMBL_DB_HOST"],
+        CHEMBL_DB_NAME=config["CHEMBL_DB_NAME"],
+        CHEMBL_DB_USER=config["CHEMBL_DB_USER"],
+        CHEMBL_DB_PASSWORD=config["CHEMBL_DB_PASSWORD"],
+        CHEMBL_DB_PORT=config["CHEMBL_DB_PORT"],
+    log:
+        "logs/get_compound_structures/all.log",
+    benchmark:
+        "benchmark/get_compound_structures/all.tsv"
+    shell:
+        "python src/get_compound_structures.py "
+        "--db_name '{params.CHEMBL_DB_NAME}' "
+        "--db_host '{params.CHEMBL_DB_HOST}' "
+        "--db_user '{params.CHEMBL_DB_USER}' "
+        "--db_password '{params.CHEMBL_DB_PASSWORD}' "
+        "--db_port {params.CHEMBL_DB_PORT} "
+        "--activities_tsv_file '{input.activities_tsv_file}' "
+        "--compound_structures_tsv_file '{output.compound_structures_tsv_file}' "
         " > {log} 2>&1 "
