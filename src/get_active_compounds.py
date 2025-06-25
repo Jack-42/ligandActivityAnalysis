@@ -88,6 +88,7 @@ def get_active_mol_info(
         AND a.standard_flag = 1
         AND md.structure_type = 'MOL'
         AND (a.data_validity_comment IS NULL OR a.data_validity_comment = 'Manually validated')
+        AND (a.potential_duplicate = 0)
         AND (cp.full_mwt >= {min_mw})
         AND (cp.full_mwt <= {max_mw})
         AND (sa.alert_set_id NOT IN {structural_alert_set_ids});
