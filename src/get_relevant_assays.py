@@ -59,6 +59,11 @@ def parse_args():
         default=None,
         help="(Optional) Filter by given confidence_score",
     )
+    parser.add_argument(
+        "--exclude_variants",
+        action=argparse.BooleanOptionalAction,
+        help="Exclude assays which target a variant. Based on criteria described by: https://pubs.acs.org/doi/10.1021/acs.jcim.4c00049",
+    )
     args = parser.parse_args()
     return args
 
@@ -69,6 +74,7 @@ def get_assays(
     assay_type: Optional[str] = None,
     confidence_score: Optional[int] = None,
     doc_type: Optional[str] = None,
+    exclude_variants: bool = False,
 ) -> list[int]:
     query = sql.SQL(
         """
@@ -78,13 +84,15 @@ def get_assays(
         WHERE tid IN {tids}
         AND ({assay_type} IS NULL OR assay_type = {assay_type})
         AND ({confidence_score} IS NULL OR confidence_score = {confidence_score})
-        AND ({doc_type} IS NULL OR d.doc_type = {doc_type});
+        AND ({doc_type} IS NULL OR d.doc_type = {doc_type})
+        AND (NOT {exclude_variants} OR (variant_id is NULL AND NOT(LOWER(description) LIKE '%mutant%' OR LOWER(description) LIKE '%mutation%' OR LOWER(description) LIKE '%variant%')));
         """
     ).format(
         tids=sql.Literal(tuple(tids)),
         assay_type=sql.Literal(assay_type),
         confidence_score=sql.Literal(confidence_score),
         doc_type=sql.Literal(doc_type),
+        exclude_variants=sql.Literal(exclude_variants),
     )
 
     cursor.execute(query)
@@ -107,7 +115,14 @@ def main():
 
     target_df = pl.read_csv(args.target_tsv_file, separator="\t")
     tids = list(set(target_df["tid"]))
-    assays = get_assays(cursor, tids, args.assay_type)
+    assays = get_assays(
+        cursor,
+        tids,
+        args.assay_type,
+        args.confidence_score,
+        args.doc_type,
+        args.exclude_variants,
+    )
     write_to_tsv(args.assay_tsv_file, assays, ["assay_id", "tid"])
 
     # Close connections

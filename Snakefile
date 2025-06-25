@@ -8,6 +8,12 @@ min_version("6.0")
 configfile: "config.yaml"
 
 
+def get_boolean_arg(key: str, param_name: str, default=None):
+    return (
+        f"--{param_name}" if config.get(key, default) == True else f"--no-{param_name}"
+    )
+
+
 CHEMBL_VERSION = re.search(r"\d+", config["CHEMBL_POSTGRES_DB_LINK"])[0]
 CHEMBL_DB_TAR_FPATH = os.path.join(
     config["CHEMBL_LOCAL_DIR"], os.path.basename(config["CHEMBL_POSTGRES_DB_LINK"])
@@ -205,6 +211,7 @@ rule get_relevant_assays:
         CHEMBL_DB_USER=config["CHEMBL_DB_USER"],
         CHEMBL_DB_PASSWORD=config["CHEMBL_DB_PASSWORD"],
         CHEMBL_DB_PORT=config["CHEMBL_DB_PORT"],
+        EXCLUDE_VARIANTS=get_boolean_arg("EXCLUDE_VARIANTS", "exclude_variants", False),
     log:
         "logs/get_relevant_assays/all.log",
     benchmark:
@@ -221,6 +228,7 @@ rule get_relevant_assays:
         "--assay_type '{params.ASSAY_TYPE}' "
         "--confidence_score {params.CONFIDENCE_SCORE} "
         "--doc_type '{params.DOC_TYPE}' "
+        "{params.EXCLUDE_VARIANTS} "
         " > {log} 2>&1 "
 
 
