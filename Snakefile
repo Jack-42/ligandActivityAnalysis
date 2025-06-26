@@ -43,9 +43,7 @@ ASSAYS_TSV_FILE = os.path.join(DATA_SUBDIR, "assays", "assay_info.tsv")
 ACTIVITIES_TSV_FILE = os.path.join(DATA_SUBDIR, "activities", "activity_info.tsv")
 STRUCTURE_SUBDIR = os.path.join(DATA_SUBDIR, "compound_structures")
 COMPOUND_STRUCTURES_TSV_FILE = os.path.join(STRUCTURE_SUBDIR, "structure_info.tsv")
-COMPOUND_FINGERPRINTS_PARQUET_FILE = os.path.join(
-    STRUCTURE_SUBDIR, "fingerprints.parquet"
-)
+COMPOUND_FINGERPRINTS_PKL_FILE = os.path.join(STRUCTURE_SUBDIR, "fingerprints.pkl")
 APT_PNG_FILE = os.path.join(FIGURES_DIR, "assays_per_target.png")
 FAMILY_TREE_PNG_FILE = os.path.join(FIGURES_DIR, "protein_family_tree.png")
 
@@ -54,7 +52,7 @@ rule all:
     input:
         APT_PNG_FILE,
         ACTIVITIES_TSV_FILE,
-        COMPOUND_FINGERPRINTS_PARQUET_FILE,
+        COMPOUND_FINGERPRINTS_PKL_FILE,
         FAMILY_DETAILS_TSV_FILE,
         FAMILY_TREE_PNG_FILE,
 
@@ -335,7 +333,7 @@ rule generate_fingerprints:
     input:
         compound_structures_tsv_file=COMPOUND_STRUCTURES_TSV_FILE,
     output:
-        fingerprints_parquet_file=COMPOUND_FINGERPRINTS_PARQUET_FILE,
+        fingerprints_pkl_file=COMPOUND_FINGERPRINTS_PKL_FILE,
     log:
         "logs/generate_fingerprints/all.log",
     benchmark:
@@ -343,5 +341,5 @@ rule generate_fingerprints:
     shell:
         "python src/generate_fingerprints.py "
         "--compound_structures_tsv_file '{input.compound_structures_tsv_file}' "
-        "--fingerprints_parquet_file '{output.fingerprints_parquet_file}' "
+        "--fingerprints_pkl_file '{output.fingerprints_pkl_file}' "
         " > {log} 2>&1 "
