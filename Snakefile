@@ -264,7 +264,6 @@ rule visualize_protein_family_tree:
         "python src/visualize_protein_family_tree.py "
         "--family_details_tsv_file '{input.family_details_tsv_file}' "
         "--out_path '{output.out_path}' "
-        "--interactive_mode "
         " > {log} 2>&1 "
 
 
