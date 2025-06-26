@@ -41,8 +41,10 @@ FAMILY_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_info.tsv")
 FAMILY_DETAILS_TSV_FILE = os.path.join(TARGET_DATA_DIR, "family_addl_info.tsv")
 ASSAYS_TSV_FILE = os.path.join(DATA_SUBDIR, "assays", "assay_info.tsv")
 ACTIVITIES_TSV_FILE = os.path.join(DATA_SUBDIR, "activities", "activity_info.tsv")
-COMPOUND_STRUCTURES_TSV_FILE = os.path.join(
-    DATA_SUBDIR, "compound_structures", "structure_info.tsv"
+STRUCTURE_SUBDIR = os.path.join(DATA_SUBDIR, "compound_structures")
+COMPOUND_STRUCTURES_TSV_FILE = os.path.join(STRUCTURE_SUBDIR, "structure_info.tsv")
+COMPOUND_FINGERPRINTS_PARQUET_FILE = os.path.join(
+    STRUCTURE_SUBDIR, "fingerprints.parquet"
 )
 APT_PNG_FILE = os.path.join(FIGURES_DIR, "assays_per_target.png")
 FAMILY_TREE_PNG_FILE = os.path.join(FIGURES_DIR, "protein_family_tree.png")
@@ -52,7 +54,7 @@ rule all:
     input:
         APT_PNG_FILE,
         ACTIVITIES_TSV_FILE,
-        COMPOUND_STRUCTURES_TSV_FILE,
+        COMPOUND_FINGERPRINTS_PARQUET_FILE,
         FAMILY_DETAILS_TSV_FILE,
         FAMILY_TREE_PNG_FILE,
 
@@ -326,4 +328,20 @@ rule get_compound_structures:
         "--db_port {params.CHEMBL_DB_PORT} "
         "--activities_tsv_file '{input.activities_tsv_file}' "
         "--compound_structures_tsv_file '{output.compound_structures_tsv_file}' "
+        " > {log} 2>&1 "
+
+
+rule generate_fingerprints:
+    input:
+        compound_structures_tsv_file=COMPOUND_STRUCTURES_TSV_FILE,
+    output:
+        fingerprints_parquet_file=COMPOUND_FINGERPRINTS_PARQUET_FILE,
+    log:
+        "logs/generate_fingerprints/all.log",
+    benchmark:
+        "benchmark/generate_fingerprints/all.tsv"
+    shell:
+        "python src/generate_fingerprints.py "
+        "--compound_structures_tsv_file '{input.compound_structures_tsv_file}' "
+        "--fingerprints_parquet_file '{output.fingerprints_parquet_file}' "
         " > {log} 2>&1 "
