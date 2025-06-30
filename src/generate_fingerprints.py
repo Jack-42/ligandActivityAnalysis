@@ -43,9 +43,7 @@ def smiles_to_fp(smiles: str, fp_gen) -> np.ndarray:
     if mol is None:
         return None
     fp = fp_gen.GetFingerprint(mol)
-    fp_arr = np.zeros((0,), dtype=np.int8)
-    DataStructs.ConvertToNumpyArray(fp, fp_arr)
-    return fp_arr
+    return fp
 
 
 def main():
