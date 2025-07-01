@@ -1,6 +1,6 @@
 # DATA DIRS
-CHEMBL_LOCAL_DIR: "/media/jack/odisk/data/chembl/"
-DATA_DIR: "/media/jack/odisk/data/LAA/"
+CHEMBL_LOCAL_DIR: "/home/jack/unm_gra/data/chembl/"
+DATA_DIR: "/home/jack/unm_gra/data/LAA/"
 
 # ChEMBL FILES
 # NOTE: to update ChEMBL version just change "35" to desired version
@@ -11,12 +11,12 @@ CHEMBL_DB_NAME: "chembl_35"
 CHEMBL_DB_HOST: "localhost"
 CHEMBL_DB_USER: "toad"
 CHEMBL_DB_PASSWORD: "cookies"
-CHEMBL_DB_PORT: 5434
+CHEMBL_DB_PORT: 5432
 
 # PROTEIN TARGET SELECTION
 ORGANISM: "Homo sapiens"
 TARGET_TYPE: "SINGLE PROTEIN"
-PROTEIN_CLASS_ID: 1100 # 6 corresponds to protein kinase family - see protein_classification table
+PROTEIN_CLASS_ID: 1100 # 1100 corresponds to protein kinase family - see protein_classification table
 
 # ASSAY SELECTION
 ASSAY_TYPE: "B" # B=binding, see https://chembl.gitbook.io/chembl-interface-documentation/frequently-asked-questions/chembl-data-questions#what-is-the-assay-type
@@ -29,3 +29,7 @@ PCHEMBL_MIN_VALUE: 7.52 # potency threshold, defined as -log_10(measured val) M:
 MIN_MW: 200 # minimum molecular weight in Da
 MAX_MW: 900 # maximum ''
 STRUCTURAL_ALERT_SET_IDS: "4" # can provide list like "1,2,3,4".  4=PAINS, see structural_alert_sets table
+
+# LIGAND CLUSTERING (by target classification)
+MIN_CLASS_LEVEL: 4 # note that 1100 has a class_level of 3
+MAX_CLASS_LEVEL: 6

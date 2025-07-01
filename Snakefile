@@ -47,6 +47,10 @@ COMPOUND_FINGERPRINTS_PKL_FILE = os.path.join(STRUCTURE_SUBDIR, "fingerprints.pk
 APT_PNG_FILE = os.path.join(FIGURES_DIR, "assays_per_target.png")
 FAMILY_TREE_PNG_FILE = os.path.join(FIGURES_DIR, "protein_family_tree.png")
 
+# ligands clustered by classification of their target(s)
+LIGAND_CLUSTER_DIR = os.path.join(DATA_SUBDIR, "ligand_clusters")
+LIGAND2TID_TSV_FILE = os.path.join(LIGAND_CLUSTER_DIR, "ligand2tid.tsv")
+
 
 rule all:
     input:
@@ -55,6 +59,8 @@ rule all:
         COMPOUND_FINGERPRINTS_PKL_FILE,
         FAMILY_DETAILS_TSV_FILE,
         FAMILY_TREE_PNG_FILE,
+        directory(LIGAND_CLUSTER_DIR),
+        LIGAND2TID_TSV_FILE,
 
 
 rule download_chembl_files:
@@ -342,4 +348,33 @@ rule generate_fingerprints:
         "python src/generate_fingerprints.py "
         "--compound_structures_tsv_file '{input.compound_structures_tsv_file}' "
         "--fingerprints_pkl_file '{output.fingerprints_pkl_file}' "
+        " > {log} 2>&1 "
+
+
+rule cluster_active_ligands:
+    input:
+        activities_tsv_file=ACTIVITIES_TSV_FILE,
+        assay_tsv_file=ASSAYS_TSV_FILE,
+        target_tsv_file=TARGET_TSV_FILE,
+        family_details_tsv_file=FAMILY_DETAILS_TSV_FILE,
+    output:
+        ligand_cluster_dir=directory(LIGAND_CLUSTER_DIR),
+        ligand2tid_tsv_file=LIGAND2TID_TSV_FILE,
+    params:
+        min_class_level=config["MIN_CLASS_LEVEL"],
+        max_class_level=config["MAX_CLASS_LEVEL"],
+    log:
+        "logs/cluster_active_ligands/all.log",
+    benchmark:
+        "benchmark/cluster_active_ligands/all.tsv"
+    shell:
+        "python src/cluster_active_ligands.py "
+        "--activities_tsv_file '{input.activities_tsv_file}' "
+        "--assay_tsv_file '{input.assay_tsv_file}' "
+        "--target_tsv_file '{input.target_tsv_file}' "
+        "--family_details_tsv_file '{input.family_details_tsv_file}' "
+        "--ligand_cluster_dir '{output.ligand_cluster_dir}' "
+        "--ligand2tid_tsv_file '{output.ligand2tid_tsv_file}' "
+        "--min_class_level {params.min_class_level} "
+        "--max_class_level {params.max_class_level} "
         " > {log} 2>&1 "

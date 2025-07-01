@@ -7,9 +7,10 @@ family / protein.
 """
 
 import argparse
+import os
 
 import polars as pl
-from bigtree import polars_to_tree_by_relation
+from bigtree import find_path, polars_to_tree_by_relation
 
 
 def parse_args():
@@ -46,11 +47,18 @@ def parse_args():
         help="Input TSV file containing protein_class_id and additional information (pref_name, short_name, class_level)",
     )
     parser.add_argument(
-        "--output_dir",
+        "--ligand_cluster_dir",
         type=str,
         required=True,
         default=argparse.SUPPRESS,
         help="Output directory to save clustered ligands to",
+    )
+    parser.add_argument(
+        "--ligand2tid_tsv_file",
+        type=str,
+        required=False,
+        default=None,
+        help="(Optional) Output TSV file containing mapping from ligands (molregno) to targets (tid)",
     )
     parser.add_argument(
         "--min_class_level",
@@ -70,27 +78,74 @@ def parse_args():
     return args
 
 
+def get_protein_class_id_of_class_level(leaf_node, class_level: int) -> int:
+    if leaf_node.class_level < class_level:
+        return None
+    node = leaf_node
+    while node.class_level > class_level:
+        node = node.parent
+    return node.name  # will be protein_class_id based on main() construction
+
+
 def main():
     args = parse_args()
-    activity_df = pl.read_csv(
-        args.activities_tsv_file, separator="\t", columns=["molregno", "assay_id"]
-    )
-    assay_df = pl.read_csv(
-        args.assay_tsv_file, separator="\t", columns=["assay_id", "tid"]
-    )
     target_df = pl.read_csv(
         args.target_tsv_file, separator="\t", columns=["tid", "protein_class_id"]
     )
     fam_df = pl.read_csv(
         args.family_details_tsv_file,
         separator="\t",
-        columns=["protein_class_id", "parent_id" "class_level"],
+        columns=["protein_class_id", "parent_id", "class_level"],
     )
-    t2f_df = target_df.join(fam_df, on="")
+    activity_df = pl.read_csv(
+        args.activities_tsv_file, separator="\t", columns=["molregno", "assay_id"]
+    )
+    assay_df = pl.read_csv(
+        args.assay_tsv_file, separator="\t", columns=["assay_id", "tid"]
+    )
+
+    # map active ligands to targets
+    joined = activity_df.join(assay_df, on="assay_id", how="inner")
+    mol2tid_df = joined.select(["molregno", "tid"]).unique()
+    assert len(mol2tid_df["molregno"].unique()) == len(activity_df["molregno"].unique())
+
+    # load family relationships
     tree = polars_to_tree_by_relation(
         fam_df, child_col="protein_class_id", parent_col="parent_id"
     )
-    # TODO: use tree to help find parent / child relationships
+    target_df = target_df.with_columns(
+        target_df["protein_class_id"]
+        .map_elements(lambda pid: find_path(tree, f"/{pid}"), return_dtype=pl.Object)
+        .alias("fam_path")
+    )
+    assert not (target_df["fam_path"].is_null().any())
+
+    # cluster ligands by protein family info
+    # NOTE: a single ligand can belong to multiple clusters because of:
+    # 1) ligand being active against > 1 target
+    # 2) ligand active against a single target, but that target has multiple classifications
+    # map ligands to active target(s) + family info
+    for cl in range(args.min_class_level, args.max_class_level + 1):
+        tid2cluster_df = target_df.with_columns(
+            target_df["fam_path"]
+            .map_elements(
+                lambda n: get_protein_class_id_of_class_level(n, cl), return_dtype=int
+            )
+            .alias("fam_cluster")
+        )
+        tid2cluster_df = tid2cluster_df[["tid", "fam_cluster"]]
+        mol2cluster_df = mol2tid_df.join(tid2cluster_df, on="tid", how="inner")
+        mol2cluster_df = mol2cluster_df.drop_nulls(subset=["fam_cluster"])
+        mol2cluster_df = mol2cluster_df.sort(by="molregno")
+        save_path = os.path.join(
+            args.ligand_cluster_dir, f"ligand2cluster-class_level={cl}.tsv"
+        )
+        mol2cluster_df.write_csv(save_path, separator="\t")
+
+    # save mol2tid dataframe
+    if args.ligand2tid_tsv_file is not None:
+        mol2tid_df = mol2tid_df.sort(by="molregno")
+        mol2tid_df.write_csv(args.ligand2tid_tsv_file, separator="\t")
 
 
 if __name__ == "__main__":
