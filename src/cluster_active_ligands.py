@@ -131,11 +131,18 @@ def main():
             .map_elements(
                 lambda n: get_protein_class_id_of_class_level(n, cl), return_dtype=int
             )
-            .alias("fam_cluster")
+            .alias("protein_class_id")
         )
-        tid2cluster_df = tid2cluster_df[["tid", "fam_cluster"]]
+        # null indicates no classification at this class_level
+        tid2cluster_df = tid2cluster_df.drop_nulls(subset=["protein_class_id"])
+        # help make it explicit that we're clustering by protein_class_id
+        unique_clusters = tid2cluster_df["protein_class_id"].unique().sort()
+        cluster_mapping = {cluster: i + 1 for i, cluster in enumerate(unique_clusters)}
+        tid2cluster_df = tid2cluster_df.with_columns(
+            pl.col("protein_class_id").replace(cluster_mapping).alias("fam_cluster")
+        )
+        tid2cluster_df = tid2cluster_df[["tid", "protein_class_id", "fam_cluster"]]
         mol2cluster_df = mol2tid_df.join(tid2cluster_df, on="tid", how="inner")
-        mol2cluster_df = mol2cluster_df.drop_nulls(subset=["fam_cluster"])
         mol2cluster_df = mol2cluster_df.sort(by="molregno")
         save_path = os.path.join(
             args.ligand_cluster_dir, f"ligand2cluster-class_level={cl}.tsv"
