@@ -14,20 +14,6 @@ def get_boolean_arg(key: str, param_name: str, default=None):
     )
 
 
-CHEMBL_VERSION = re.search(r"\d+", config["CHEMBL_POSTGRES_DB_LINK"])[0]
-CHEMBL_DB_TAR_FPATH = os.path.join(
-    config["CHEMBL_LOCAL_DIR"], os.path.basename(config["CHEMBL_POSTGRES_DB_LINK"])
-)
-CHEMBL_DB_DMP_FILE = f"chembl_{CHEMBL_VERSION}_postgresql.dmp"
-CHEMBL_DB_DMP_FPATH = os.path.join(
-    config["CHEMBL_LOCAL_DIR"],
-    f"chembl_{CHEMBL_VERSION}/chembl_{CHEMBL_VERSION}_postgresql/",
-    CHEMBL_DB_DMP_FILE,
-)
-
-SETUP_DB_DONE_FILE = "logs/setup_db/done.txt"
-SETUP_USER_DONE_FILE = "logs/setup_user/done.txt"
-
 # want to make it easy to run workflow with different organism, target_type, etc
 # all other data depends on selected targets
 SUBDIR_NAME = "".join(
@@ -59,95 +45,11 @@ rule all:
         COMPOUND_FINGERPRINTS_PKL_FILE,
         FAMILY_DETAILS_TSV_FILE,
         FAMILY_TREE_PNG_FILE,
-        directory(LIGAND_CLUSTER_DIR),
+        LIGAND_CLUSTER_DIR,
         LIGAND2TID_TSV_FILE,
 
 
-rule download_chembl_files:
-    output:
-        CHEMBL_DB_TAR_FPATH=CHEMBL_DB_TAR_FPATH,
-    params:
-        CHEMBL_POSTGRES_DB_LINK=config["CHEMBL_POSTGRES_DB_LINK"],
-        CHEMBL_LOCAL_DIR=config["CHEMBL_LOCAL_DIR"],
-    log:
-        "logs/download_chembl_files/all.log",
-    benchmark:
-        "benchmark/download_chembl_files/all.tsv"
-    shell:
-        """
-        mkdir -p {params.CHEMBL_LOCAL_DIR} && \
-        wget -O {output.CHEMBL_DB_TAR_FPATH} {params.CHEMBL_POSTGRES_DB_LINK} \
-        > {log} 2>&1 
-        """
-
-
-rule extract_files:
-    input:
-        CHEMBL_DB_TAR_FPATH=CHEMBL_DB_TAR_FPATH,
-    output:
-        CHEMBL_DB_DMP_FPATH=CHEMBL_DB_DMP_FPATH,
-    params:
-        CHEMBL_LOCAL_DIR=config["CHEMBL_LOCAL_DIR"],
-    log:
-        "logs/extract_files/all.log",
-    benchmark:
-        "benchmark/extract_files/all.tsv"
-    shell:
-        """
-        tar -xzvf {input.CHEMBL_DB_TAR_FPATH} -C {params.CHEMBL_LOCAL_DIR} \
-        > {log} 2>&1 
-        """
-
-
-rule setup_db:
-    input:
-        CHEMBL_DB_DMP_FPATH=CHEMBL_DB_DMP_FPATH,
-    output:
-        touch(SETUP_DB_DONE_FILE),
-    params:
-        CHEMBL_DB_HOST=config["CHEMBL_DB_HOST"],
-        CHEMBL_DB_NAME=config["CHEMBL_DB_NAME"],
-        CHEMBL_DB_PORT=config["CHEMBL_DB_PORT"],
-    log:
-        "logs/setup_db/all.log",
-    benchmark:
-        "benchmark/setup_db/all.tsv"
-    shell:
-        """
-        createdb -h {params.CHEMBL_DB_HOST} -p {params.CHEMBL_DB_PORT} {params.CHEMBL_DB_NAME} || echo "Database may already exist" && \
-        pg_restore -O -v -h {params.CHEMBL_DB_HOST} -p {params.CHEMBL_DB_PORT} -d {params.CHEMBL_DB_NAME} {input.CHEMBL_DB_DMP_FPATH} \
-        > {log} 2>&1
-        """
-
-
-rule setup_user:
-    input:
-        SETUP_DB_DONE_FILE,
-    output:
-        touch(SETUP_USER_DONE_FILE),
-    params:
-        CHEMBL_DB_HOST=config["CHEMBL_DB_HOST"],
-        CHEMBL_DB_NAME=config["CHEMBL_DB_NAME"],
-        CHEMBL_DB_USER=config["CHEMBL_DB_USER"],
-        CHEMBL_DB_PASSWORD=config["CHEMBL_DB_PASSWORD"],
-        CHEMBL_DB_PORT=config["CHEMBL_DB_PORT"],
-    log:
-        "logs/setup_user/all.log",
-    benchmark:
-        "benchmark/setup_user/all.tsv"
-    shell:
-        """
-        psql -d {params.CHEMBL_DB_NAME} -c "CREATE ROLE {params.CHEMBL_DB_USER} WITH LOGIN PASSWORD '{params.CHEMBL_DB_PASSWORD}'" && \
-        psql -d {params.CHEMBL_DB_NAME} -c "GRANT SELECT ON ALL TABLES IN SCHEMA public TO {params.CHEMBL_DB_USER}" && \
-        psql -d {params.CHEMBL_DB_NAME} -c "GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO {params.CHEMBL_DB_USER}" && \
-        psql -d {params.CHEMBL_DB_NAME} -c "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO {params.CHEMBL_DB_USER}" \
-        > {log} 2>&1 
-        """
-
-
 rule get_protein_targets:
-    input:
-        SETUP_USER_DONE_FILE,
     output:
         target_tsv_file=TARGET_TSV_FILE,
         family_tsv_file=FAMILY_TSV_FILE,
