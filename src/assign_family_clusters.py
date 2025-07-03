@@ -47,11 +47,11 @@ def parse_args():
         help="Input TSV file containing protein_class_id and additional information (pref_name, short_name, class_level)",
     )
     parser.add_argument(
-        "--ligand_cluster_dir",
+        "--cluster_dir",
         type=str,
         required=True,
         default=argparse.SUPPRESS,
-        help="Output directory to save clustered ligands to",
+        help="Output directory to save clustered ligands and targets to",
     )
     parser.add_argument(
         "--ligand2tid_tsv_file",
@@ -144,10 +144,16 @@ def main():
         tid2cluster_df = tid2cluster_df[["tid", "protein_class_id", "fam_cluster"]]
         mol2cluster_df = mol2tid_df.join(tid2cluster_df, on="tid", how="inner")
         mol2cluster_df = mol2cluster_df.sort(by="molregno")
-        save_path = os.path.join(
-            args.ligand_cluster_dir, f"ligand2cluster-class_level={cl}.tsv"
+        tid2cluster_df = tid2cluster_df.sort(by="tid")
+        mol_save_path = os.path.join(
+            args.cluster_dir, f"ligand2cluster-class_level={cl}.tsv"
         )
-        mol2cluster_df.write_csv(save_path, separator="\t")
+        tid_save_path = os.path.join(
+            args.cluster_dir, f"target2cluster-class_level={cl}.tsv"
+        )
+        mol2cluster_df.write_csv(mol_save_path, separator="\t")
+        # saving tid2cluster_df bc there may be some targets which have no active ligands
+        tid2cluster_df.write_csv(tid_save_path, separator="\t")
 
     # save mol2tid dataframe
     if args.ligand2tid_tsv_file is not None:

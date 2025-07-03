@@ -34,8 +34,9 @@ APT_PNG_FILE = os.path.join(FIGURES_DIR, "assays_per_target.png")
 FAMILY_TREE_PNG_FILE = os.path.join(FIGURES_DIR, "protein_family_tree.png")
 
 # ligands clustered by classification of their target(s)
-LIGAND_CLUSTER_DIR = os.path.join(DATA_SUBDIR, "ligand_clusters")
-LIGAND2TID_TSV_FILE = os.path.join(LIGAND_CLUSTER_DIR, "ligand2tid.tsv")
+# as well as targets "clustered" by family classification
+CLUSTER_DIR = os.path.join(DATA_SUBDIR, "family_clusters")
+LIGAND2TID_TSV_FILE = os.path.join(CLUSTER_DIR, "ligand2tid.tsv")
 
 
 rule all:
@@ -45,7 +46,7 @@ rule all:
         COMPOUND_FINGERPRINTS_PKL_FILE,
         FAMILY_DETAILS_TSV_FILE,
         FAMILY_TREE_PNG_FILE,
-        LIGAND_CLUSTER_DIR,
+        CLUSTER_DIR,
         LIGAND2TID_TSV_FILE,
 
 
@@ -253,29 +254,29 @@ rule generate_fingerprints:
         " > {log} 2>&1 "
 
 
-rule cluster_active_ligands:
+rule assign_family_clusters:
     input:
         activities_tsv_file=ACTIVITIES_TSV_FILE,
         assay_tsv_file=ASSAYS_TSV_FILE,
         target_tsv_file=TARGET_TSV_FILE,
         family_details_tsv_file=FAMILY_DETAILS_TSV_FILE,
     output:
-        ligand_cluster_dir=directory(LIGAND_CLUSTER_DIR),
+        cluster_dir=directory(CLUSTER_DIR),
         ligand2tid_tsv_file=LIGAND2TID_TSV_FILE,
     params:
         min_class_level=config["MIN_CLASS_LEVEL"],
         max_class_level=config["MAX_CLASS_LEVEL"],
     log:
-        "logs/cluster_active_ligands/all.log",
+        "logs/assign_family_clusters/all.log",
     benchmark:
-        "benchmark/cluster_active_ligands/all.tsv"
+        "benchmark/assign_family_clusters/all.tsv"
     shell:
-        "python src/cluster_active_ligands.py "
+        "python src/assign_family_clusters.py "
         "--activities_tsv_file '{input.activities_tsv_file}' "
         "--assay_tsv_file '{input.assay_tsv_file}' "
         "--target_tsv_file '{input.target_tsv_file}' "
         "--family_details_tsv_file '{input.family_details_tsv_file}' "
-        "--ligand_cluster_dir '{output.ligand_cluster_dir}' "
+        "--cluster_dir '{output.cluster_dir}' "
         "--ligand2tid_tsv_file '{output.ligand2tid_tsv_file}' "
         "--min_class_level {params.min_class_level} "
         "--max_class_level {params.max_class_level} "

@@ -32,4 +32,4 @@ STRUCTURAL_ALERT_SET_IDS: "4" # can provide list like "1,2,3,4".  4=PAINS, see s
 
 # LIGAND CLUSTERING (by target classification)
 MIN_CLASS_LEVEL: 4 # note that 1100 has a class_level of 3
-MAX_CLASS_LEVEL: 6
+MAX_CLASS_LEVEL: 5
