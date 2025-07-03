@@ -33,3 +33,8 @@ STRUCTURAL_ALERT_SET_IDS: "4" # can provide list like "1,2,3,4".  4=PAINS, see s
 # LIGAND CLUSTERING (by target classification)
 MIN_CLASS_LEVEL: 4 # note that 1100 has a class_level of 3
 MAX_CLASS_LEVEL: 5
+
+# LIGAND SIMILARITY CALCULATION
+# make sure to set a reasonable limit here - current version of workflow takes O(N^2) time and space to create/store
+# similarity matrix
+MAX_N_COMPOUNDS: 20000

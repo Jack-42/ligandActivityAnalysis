@@ -38,16 +38,21 @@ FAMILY_TREE_PNG_FILE = os.path.join(FIGURES_DIR, "protein_family_tree.png")
 CLUSTER_DIR = os.path.join(DATA_SUBDIR, "family_clusters")
 LIGAND2TID_TSV_FILE = os.path.join(CLUSTER_DIR, "ligand2tid.tsv")
 
+SIMILARITY_NPY_FILE = os.path.join(
+    STRUCTURE_SUBDIR, "similarity_lower_triangular_matrix.npy"
+)
+SIMILARITY_ID_PKL_FILE = os.path.join(STRUCTURE_SUBDIR, "similarity_id_list.pkl")
+
 
 rule all:
     input:
         APT_PNG_FILE,
         ACTIVITIES_TSV_FILE,
-        COMPOUND_FINGERPRINTS_PKL_FILE,
         FAMILY_DETAILS_TSV_FILE,
         FAMILY_TREE_PNG_FILE,
         CLUSTER_DIR,
         LIGAND2TID_TSV_FILE,
+        SIMILARITY_NPY_FILE,
 
 
 rule get_protein_targets:
@@ -280,4 +285,25 @@ rule assign_family_clusters:
         "--ligand2tid_tsv_file '{output.ligand2tid_tsv_file}' "
         "--min_class_level {params.min_class_level} "
         "--max_class_level {params.max_class_level} "
+        " > {log} 2>&1 "
+
+
+rule calculate_fp_similarity:
+    input:
+        fingerprints_pkl_file=COMPOUND_FINGERPRINTS_PKL_FILE,
+    output:
+        similarity_npy_file=SIMILARITY_NPY_FILE,
+        similarity_id_pkl_file=SIMILARITY_ID_PKL_FILE,
+    params:
+        max_n_compounds=config["MAX_N_COMPOUNDS"],
+    log:
+        "logs/calculate_fp_similarity/all.log",
+    benchmark:
+        "benchmark/calculate_fp_similarity/all.tsv"
+    shell:
+        "python src/calculate_fp_similarity.py "
+        "--fingerprints_pkl_file '{input.fingerprints_pkl_file}' "
+        "--similarity_npy_file '{output.similarity_npy_file}' "
+        "--similarity_id_pkl_file '{output.similarity_id_pkl_file}' "
+        "--max_n_compounds {params.max_n_compounds} "
         " > {log} 2>&1 "
