@@ -140,9 +140,9 @@ def main():
         unique_clusters = tid2cluster_df["protein_class_id"].unique().sort()
         cluster_mapping = {cluster: i + 1 for i, cluster in enumerate(unique_clusters)}
         tid2cluster_df = tid2cluster_df.with_columns(
-            pl.col("protein_class_id").replace(cluster_mapping).alias("fam_cluster")
+            pl.col("protein_class_id").replace(cluster_mapping).alias("cluster")
         )
-        tid2cluster_df = tid2cluster_df[["tid", "protein_class_id", "fam_cluster"]]
+        tid2cluster_df = tid2cluster_df[["tid", "protein_class_id", "cluster"]]
         mol2cluster_df = mol2tid_df.join(tid2cluster_df, on="tid", how="inner")
         mol2cluster_df = mol2cluster_df.sort(by="molregno")
         tid2cluster_df = tid2cluster_df.sort(by="tid")

@@ -42,17 +42,15 @@ SIMILARITY_NPY_FILE = os.path.join(
     STRUCTURE_SUBDIR, "similarity_lower_triangular_matrix.npy"
 )
 SIMILARITY_ID_PKL_FILE = os.path.join(STRUCTURE_SUBDIR, "similarity_id_list.pkl")
+CLUSTER2SIM_DIR = os.path.join(DATA_SUBDIR, "processed_similarity_cluster_data")
 
 
 rule all:
     input:
         APT_PNG_FILE,
-        ACTIVITIES_TSV_FILE,
         FAMILY_DETAILS_TSV_FILE,
         FAMILY_TREE_PNG_FILE,
-        CLUSTER_DIR,
-        LIGAND2TID_TSV_FILE,
-        SIMILARITY_NPY_FILE,
+        CLUSTER2SIM_DIR,
 
 
 rule get_protein_targets:
@@ -306,4 +304,31 @@ rule calculate_fp_similarity:
         "--similarity_npy_file '{output.similarity_npy_file}' "
         "--similarity_id_pkl_file '{output.similarity_id_pkl_file}' "
         "--max_n_compounds {params.max_n_compounds} "
+        " > {log} 2>&1 "
+
+
+# note: can include fingerprints file as input to validate script logic (at the cost of extra compute)
+# (I've already validated this with a large matrix, so it should be ok)
+rule process_similarity_by_cluster:
+    input:
+        similarity_npy_file=SIMILARITY_NPY_FILE,
+        similarity_id_pkl_file=SIMILARITY_ID_PKL_FILE,
+        cluster_dir=CLUSTER_DIR,
+    output:
+        cluster2sim_dir=directory(CLUSTER2SIM_DIR),
+    params:
+        min_class_level=config["MIN_CLASS_LEVEL"],
+        max_class_level=config["MAX_CLASS_LEVEL"],
+    log:
+        "logs/process_similarity_by_cluster/all.log",
+    benchmark:
+        "benchmark/process_similarity_by_cluster/all.tsv"
+    shell:
+        "python src/process_similarity_by_cluster.py "
+        "--similarity_npy_file '{input.similarity_npy_file}' "
+        "--similarity_id_pkl_file '{input.similarity_id_pkl_file}' "
+        "--cluster_dir '{input.cluster_dir}' "
+        "--cluster2sim_dir '{output.cluster2sim_dir}' "
+        "--min_class_level {params.min_class_level} "
+        "--max_class_level {params.max_class_level} "
         " > {log} 2>&1 "
