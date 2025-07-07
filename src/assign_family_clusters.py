@@ -7,10 +7,11 @@ family / protein.
 """
 
 import argparse
-import os
 
 import polars as pl
 from bigtree import find_path, polars_to_tree_by_relation
+
+from utils.constants import get_ligand2cluster_fpath, get_target2cluster_fpath
 
 
 def parse_args():
@@ -145,12 +146,8 @@ def main():
         mol2cluster_df = mol2tid_df.join(tid2cluster_df, on="tid", how="inner")
         mol2cluster_df = mol2cluster_df.sort(by="molregno")
         tid2cluster_df = tid2cluster_df.sort(by="tid")
-        mol_save_path = os.path.join(
-            args.cluster_dir, f"ligand2cluster-class_level={cl}.tsv"
-        )
-        tid_save_path = os.path.join(
-            args.cluster_dir, f"target2cluster-class_level={cl}.tsv"
-        )
+        mol_save_path = get_ligand2cluster_fpath(args.cluster_dir, cl)
+        tid_save_path = get_target2cluster_fpath(args.cluster_dir, cl)
         mol2cluster_df.write_csv(mol_save_path, separator="\t")
         # saving tid2cluster_df bc there may be some targets which have no active ligands
         tid2cluster_df.write_csv(tid_save_path, separator="\t")
