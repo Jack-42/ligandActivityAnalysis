@@ -13,13 +13,18 @@ import numpy as np
 import polars as pl
 from rdkit import DataStructs  # for validation
 
-from utils.constants import get_cluster2sim_fpath, get_ligand2cluster_fpath
+from utils.constants import (
+    get_assay2sim_fpath,
+    get_cluster2sim_fpath,
+    get_ligand2cluster_fpath,
+    get_tid2sim_fpath,
+)
 from utils.io import load_from_pkl, save_to_pkl
 
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Visualize distributions of similarity values contained in lower triangular matrix (LTM)",
+        description="Gather similarity values contained in lower triangular matrix (LTM) based on given cluster files",
         epilog="",
     )
     parser.add_argument(
@@ -69,6 +74,20 @@ def parse_args():
         default=None,
         help="(Optional) Input Pickle file containing compound ID mapped to fingerprint. If given will be used to validate the logic of this script.",
     )
+    parser.add_argument(
+        "--ligand2tid_tsv_file",
+        type=str,
+        required=False,
+        default=None,
+        help="(Optional) TSV file containing mapping from ligands (molregno) to targets (tid). If given will also gather ligand similarity values per TID.",
+    )
+    parser.add_argument(
+        "--activities_tsv_file",
+        type=str,
+        required=False,
+        default=None,
+        help="(Optional) Input TSV file containing active compound information (ligand <-> assay_id mapping). If given will also gather ligand similarity values per ASSAY_ID.",
+    )
     args = parser.parse_args()
     return args
 
@@ -94,6 +113,47 @@ def run_check(fetched_sim: float, fp_dict: dict, id1: int, id2: int, i1: int, i2
     ), f"ids={(id1, id2)}\nindices={(i1, i2)}\nfetched_sim={fetched_sim}\ntrue_sim={true_sim}\nLogic for get_ltm_idx is incorrect, check logic."
 
 
+def get_similarity_values(
+    ligand_ids: list[int],
+    sim_matrix: np.ndarray,
+    id2idx_map: dict,
+    validate: bool,
+    fp_dict: dict = None,
+) -> list[float]:
+    sim_values = []
+    for id1, id2 in combinations(ligand_ids, 2):
+        i1, i2 = id2idx_map[id1], id2idx_map[id2]
+        row = max(i1, i2)
+        col = min(i1, i2)
+        sim_idx = get_ltm_idx(row, col)
+        sim_value = sim_matrix[sim_idx]
+        sim_values.append(sim_value)
+        if validate:
+            run_check(sim_value, fp_dict, id1, id2, i1, i2)
+    return sim_values
+
+
+def gather_and_save_cluster_sim_values(
+    l2c_df: pl.DataFrame,
+    sim_matrix: np.ndarray,
+    id2idx_map: dict,
+    save_path: str,
+    validate: bool = False,
+    fp_dict: dict = None,
+    group_col: str = "cluster",
+    id_col: str = "molregno",
+) -> None:
+    cluster2simvalues = {}
+    for cluster_tup, cluster_df in l2c_df.group_by(group_col):
+        cluster_ligand_ids = cluster_df[id_col].unique().to_list()
+        sim_values = get_similarity_values(
+            cluster_ligand_ids, sim_matrix, id2idx_map, validate, fp_dict
+        )
+        cluster_id = cluster_tup[0]  # polars quirk
+        cluster2simvalues[cluster_id] = sim_values
+    save_to_pkl(cluster2simvalues, save_path)
+
+
 def main():
     args = parse_args()
     id_list = load_from_pkl(args.similarity_id_pkl_file)
@@ -117,25 +177,43 @@ def main():
     # gather compounds in each cluster and their similarities
     # then save result to pkl file
     for cl in range(args.min_class_level, args.max_class_level + 1):
-        cluster2simvalues = {}
         l2c_path = get_ligand2cluster_fpath(args.cluster_dir, cl)
-        l2c_df = pl.read_csv(l2c_path, separator="\t")
-        for cluster_tup, cluster_df in l2c_df.group_by("cluster"):
-            cluster_ligand_ids = cluster_df["molregno"].unique().to_list()
-            sim_values = []
-            for id1, id2 in combinations(cluster_ligand_ids, 2):
-                i1, i2 = id2idx_map[id1], id2idx_map[id2]
-                row = max(i1, i2)
-                col = min(i1, i2)
-                sim_idx = get_ltm_idx(row, col)
-                sim_value = sim_matrix[sim_idx]
-                sim_values.append(sim_value)
-                if validate:
-                    run_check(sim_value, fp_dict, id1, id2, i1, i2)
-            cluster_id = cluster_tup[0]  # polars quirk
-            cluster2simvalues[cluster_id] = sim_values
+        l2c_df = pl.read_csv(l2c_path, separator="\t", columns=["molregno", "cluster"])
         save_path = get_cluster2sim_fpath(args.cluster2sim_dir, cl)
-        save_to_pkl(cluster2simvalues, save_path)
+        gather_and_save_cluster_sim_values(
+            l2c_df, sim_matrix, id2idx_map, save_path, validate, fp_dict
+        )
+
+    # save per tid sim values (if requested)
+    if args.ligand2tid_tsv_file is not None:
+        ligand2tid_df = pl.read_csv(
+            args.ligand2tid_tsv_file, separator="\t", columns=["molregno", "tid"]
+        )
+        save_path = get_tid2sim_fpath(args.cluster2sim_dir)
+        gather_and_save_cluster_sim_values(
+            ligand2tid_df,
+            sim_matrix,
+            id2idx_map,
+            save_path,
+            validate,
+            fp_dict,
+            group_col="tid",
+        )
+
+    if args.activities_tsv_file is not None:
+        assay2tid_df = pl.read_csv(
+            args.activities_tsv_file, separator="\t", columns=["molregno", "assay_id"]
+        )
+        save_path = get_assay2sim_fpath(args.cluster2sim_dir)
+        gather_and_save_cluster_sim_values(
+            assay2tid_df,
+            sim_matrix,
+            id2idx_map,
+            save_path,
+            validate,
+            fp_dict,
+            group_col="assay_id",
+        )
 
 
 if __name__ == "__main__":

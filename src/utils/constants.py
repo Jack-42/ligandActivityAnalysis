@@ -19,3 +19,11 @@ def get_target2cluster_fpath(cluster_dir: str, class_level: str) -> str:
 
 def get_cluster2sim_fpath(cluster2sim_dir: str, class_level: str) -> str:
     return os.path.join(cluster2sim_dir, f"cluster2sim_class_level={class_level}.pkl")
+
+
+def get_tid2sim_fpath(cluster2sim_dir: str):
+    return os.path.join(cluster2sim_dir, f"tid2sim.pkl")
+
+
+def get_assay2sim_fpath(cluster2sim_dir: str):
+    return os.path.join(cluster2sim_dir, f"assay2sim.pkl")

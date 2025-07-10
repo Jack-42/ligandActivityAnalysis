@@ -308,27 +308,32 @@ rule calculate_fp_similarity:
 
 
 # note: can include fingerprints file as input to validate script logic (at the cost of extra compute)
+# note2: the activity and tid files are optional - included to get similarity values per assay/target
 # (I've already validated this with a large matrix, so it should be ok)
-rule process_similarity_by_cluster:
+rule gather_similarity_values:
     input:
         similarity_npy_file=SIMILARITY_NPY_FILE,
         similarity_id_pkl_file=SIMILARITY_ID_PKL_FILE,
         cluster_dir=CLUSTER_DIR,
+        ligand2tid_tsv_file=LIGAND2TID_TSV_FILE,
+        activities_tsv_file=ACTIVITIES_TSV_FILE,
     output:
         cluster2sim_dir=directory(CLUSTER2SIM_DIR),
     params:
         min_class_level=config["MIN_CLASS_LEVEL"],
         max_class_level=config["MAX_CLASS_LEVEL"],
     log:
-        "logs/process_similarity_by_cluster/all.log",
+        "logs/gather_similarity_values/all.log",
     benchmark:
-        "benchmark/process_similarity_by_cluster/all.tsv"
+        "benchmark/gather_similarity_values/all.tsv"
     shell:
-        "python src/process_similarity_by_cluster.py "
+        "python src/gather_similarity_values.py "
         "--similarity_npy_file '{input.similarity_npy_file}' "
         "--similarity_id_pkl_file '{input.similarity_id_pkl_file}' "
         "--cluster_dir '{input.cluster_dir}' "
         "--cluster2sim_dir '{output.cluster2sim_dir}' "
         "--min_class_level {params.min_class_level} "
         "--max_class_level {params.max_class_level} "
+        "--ligand2tid_tsv_file '{input.ligand2tid_tsv_file}' "
+        "--activities_tsv_file '{input.activities_tsv_file}' "
         " > {log} 2>&1 "
