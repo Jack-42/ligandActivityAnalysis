@@ -43,6 +43,7 @@ SIMILARITY_NPY_FILE = os.path.join(
 )
 SIMILARITY_ID_PKL_FILE = os.path.join(STRUCTURE_SUBDIR, "similarity_id_list.pkl")
 CLUSTER2SIM_DIR = os.path.join(DATA_SUBDIR, "processed_similarity_cluster_data")
+PROB_ANALYSIS_DIR = os.path.join(DATA_SUBDIR, "cluster_stats")
 
 
 rule all:
@@ -51,6 +52,7 @@ rule all:
         FAMILY_DETAILS_TSV_FILE,
         FAMILY_TREE_PNG_FILE,
         CLUSTER2SIM_DIR,
+        PROB_ANALYSIS_DIR,
 
 
 rule get_protein_targets:
@@ -336,4 +338,29 @@ rule gather_similarity_values:
         "--max_class_level {params.max_class_level} "
         "--ligand2tid_tsv_file '{input.ligand2tid_tsv_file}' "
         "--activities_tsv_file '{input.activities_tsv_file}' "
+        " > {log} 2>&1 "
+
+# TODO: add assay + target clusters if computationally feasible
+rule probability_analysis:
+    input:
+        similarity_npy_file=SIMILARITY_NPY_FILE,
+        similarity_id_pkl_file=SIMILARITY_ID_PKL_FILE,
+        cluster_dir=CLUSTER_DIR,
+    output:
+        prob_analysis_dir=directory(PROB_ANALYSIS_DIR),
+    params:
+        min_class_level=config["MIN_CLASS_LEVEL"],
+        max_class_level=config["MIN_CLASS_LEVEL"],  # not looking at lower class levels bc not informative 
+    log:
+        "logs/probability_analysis/all.log",
+    benchmark:
+        "benchmark/probability_analysis/all.tsv"
+    shell:
+        "python src/probability_analysis.py "
+        "--similarity_npy_file '{input.similarity_npy_file}' "
+        "--similarity_id_pkl_file '{input.similarity_id_pkl_file}' "
+        "--cluster_dir '{input.cluster_dir}' "
+        "--prob_analysis_dir '{output.prob_analysis_dir}' "
+        "--min_class_level {params.min_class_level} "
+        "--max_class_level {params.max_class_level} "
         " > {log} 2>&1 "

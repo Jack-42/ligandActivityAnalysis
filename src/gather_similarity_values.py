@@ -2,8 +2,7 @@
 @author Jack Ringer
 Date: 7/7/2025
 Description:
-Visualize distributions of similarity values between multiple
-clusters.
+Collect similarity values in clusters.
 """
 
 import argparse
@@ -20,6 +19,7 @@ from utils.constants import (
     get_tid2sim_fpath,
 )
 from utils.io import load_from_pkl, save_to_pkl
+from utils.ltm import check_size, get_id2idx_map, get_ltm_idx
 
 
 def parse_args():
@@ -92,20 +92,6 @@ def parse_args():
     return args
 
 
-def get_ltm_idx(row: int, col: int) -> int:
-    """
-    In the LTM (e.g., from GetTanimotoSimMat), find the
-    coefficient value between the given row/column.
-
-    :param int row: index of molecule 1 in id_list ("row" in matrix)
-    :param int col: index of molecule 2 in id_list ("column" in matrix)
-    :return int: index in the LTM with coeff value
-    """
-    assert col < row
-    offset = (row * (row - 1)) // 2
-    return offset + col
-
-
 def run_check(fetched_sim: float, fp_dict: dict, id1: int, id2: int, i1: int, i2: int):
     true_sim = DataStructs.TanimotoSimilarity(fp_dict[id1], fp_dict[id2])
     assert np.isclose(
@@ -158,14 +144,9 @@ def main():
     args = parse_args()
     id_list = load_from_pkl(args.similarity_id_pkl_file)
     N = len(id_list)
-    id2idx_map = {cpd_id: i for i, cpd_id in enumerate(id_list)}
+    id2idx_map = get_id2idx_map(id_list)
     sim_matrix = np.load(args.similarity_npy_file)
-    assert (
-        len(sim_matrix.shape) == 1
-    ), f"Expected LTM to be a 1D numpy array, given shape: {sim_matrix.shape}"
-    assert len(sim_matrix) == (
-        N * (N - 1) // 2
-    ), "Mismatch between length of given id_list and LTM, check input"
+    check_size(sim_matrix, N)
 
     # check if we do extra validation
     fp_dict = {}
