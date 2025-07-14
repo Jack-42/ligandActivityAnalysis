@@ -340,12 +340,14 @@ rule gather_similarity_values:
         "--activities_tsv_file '{input.activities_tsv_file}' "
         " > {log} 2>&1 "
 
-# TODO: add assay + target clusters if computationally feasible
+
 rule probability_analysis:
     input:
         similarity_npy_file=SIMILARITY_NPY_FILE,
         similarity_id_pkl_file=SIMILARITY_ID_PKL_FILE,
         cluster_dir=CLUSTER_DIR,
+        ligand2tid_tsv_file=LIGAND2TID_TSV_FILE,
+        activities_tsv_file=ACTIVITIES_TSV_FILE,
     output:
         prob_analysis_dir=directory(PROB_ANALYSIS_DIR),
     params:
@@ -363,4 +365,6 @@ rule probability_analysis:
         "--prob_analysis_dir '{output.prob_analysis_dir}' "
         "--min_class_level {params.min_class_level} "
         "--max_class_level {params.max_class_level} "
+        "--ligand2tid_tsv_file '{input.ligand2tid_tsv_file}' "
+        "--activities_tsv_file '{input.activities_tsv_file}' "
         " > {log} 2>&1 "
