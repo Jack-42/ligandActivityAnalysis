@@ -38,3 +38,13 @@ MAX_CLASS_LEVEL: 5
 # make sure to set a reasonable limit here - current version of workflow takes O(N^2) time and space to create/store
 # similarity matrix
 MAX_N_COMPOUNDS: 20000
+
+# PROBABILITY ANALYSIS
+# looking at P(same cluster | sim > sim_threshold) = P(same cluster AND sim > sim_threshold) / P(sim > sim_threshold)
+# this is of interest to see if it is more likely that two ligands will belong to the same 'cluster' (which could refer to protein group/family, individual protein targets, or assays) are more likely to be within that cluster than two randomly selected ligands
+# NOTE: the 'population' of ligands here is currently the set of ligands identified as 'active' within the given PROTEIN_CLASS_ID
+# I think the analyses could be improved (particularly for assays) if one considered all tested ligands within the group, but I haven't implemented this (it would also likely come with larger compute cost)
+# Will calculate P(same cluster | sim > sim_threshold) for multiple sim_threshold values. These threshold values calculated as np.linspace(SIMILARITY_THRESHOLD_MIN, SIMILARITY_THRESHOLD_MAX, SIMILARITY_THRESHOLD_N)
+SIMILARITY_THRESHOLD_MIN: 0.2
+SIMILARITY_THRESHOLD_MAX: 0.9
+SIMILARITY_THRESHOLD_N: 8

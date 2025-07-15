@@ -352,7 +352,10 @@ rule probability_analysis:
         prob_analysis_dir=directory(PROB_ANALYSIS_DIR),
     params:
         min_class_level=config["MIN_CLASS_LEVEL"],
-        max_class_level=config["MIN_CLASS_LEVEL"],  # not looking at lower class levels bc not informative 
+        max_class_level=config["MAX_CLASS_LEVEL"],
+        similarity_threshold_min=config["SIMILARITY_THRESHOLD_MIN"],
+        similarity_threshold_max=config["SIMILARITY_THRESHOLD_MAX"],
+        similarity_threshold_N=config["SIMILARITY_THRESHOLD_N"],
     log:
         "logs/probability_analysis/all.log",
     benchmark:
@@ -367,4 +370,7 @@ rule probability_analysis:
         "--max_class_level {params.max_class_level} "
         "--ligand2tid_tsv_file '{input.ligand2tid_tsv_file}' "
         "--activities_tsv_file '{input.activities_tsv_file}' "
+        "--similarity_threshold_min {params.similarity_threshold_min} "
+        "--similarity_threshold_max {params.similarity_threshold_max} "
+        "--similarity_threshold_N {params.similarity_threshold_N} "
         " > {log} 2>&1 "

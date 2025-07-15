@@ -72,14 +72,35 @@ def parse_args():
         type=str,
         required=False,
         default=None,
-        help="(Optional) TSV file containing mapping from ligands (molregno) to targets (tid). If given will also gather ligand similarity values per TID.",
+        help="(Optional) TSV file containing mapping from ligands (molregno) to targets (tid). If given will also calculate probabilities for ligand similarity values per TID.",
     )
     parser.add_argument(
         "--activities_tsv_file",
         type=str,
         required=False,
         default=None,
-        help="(Optional) Input TSV file containing active compound information (ligand <-> assay_id mapping). If given will also gather ligand similarity values per ASSAY_ID.",
+        help="(Optional) Input TSV file containing active compound information (ligand <-> assay_id mapping). If given will also calculate probabilities for ligand similarity values per ASSAY_ID.",
+    )
+    parser.add_argument(
+        "--similarity_threshold_min",
+        type=float,
+        required=False,
+        default=0.7,
+        help="Minimum similarity threshold value to use. Used threshold values calculated as np.linspace(similarity_threshold_min, similarity_threshold_max, similarity_threshold_N)",
+    )
+    parser.add_argument(
+        "--similarity_threshold_max",
+        type=float,
+        required=False,
+        default=0.9,
+        help="Maximum similarity threshold value to use. Used threshold values calculated as np.linspace(similarity_threshold_min, similarity_threshold_max, similarity_threshold_N)",
+    )
+    parser.add_argument(
+        "--similarity_threshold_N",
+        type=int,
+        required=False,
+        default=3,
+        help="Number of similarity thresholds to test. Used threshold values calculated as np.linspace(similarity_threshold_min, similarity_threshold_max, similarity_threshold_N)",
     )
     args = parser.parse_args()
     return args
@@ -102,20 +123,6 @@ def calculate_cluster_probability_for_single_cluster(
     id2idx_map: dict,
     similarity_threshold: float = 0.85,
 ) -> dict:
-    """
-    Calculate P(both in cluster | similarity > threshold) for a specific cluster.
-
-    Args:
-        cluster_ligands: Set of ligand IDs that belong to this cluster
-        all_ligand_ids: List of all ligand IDs to consider
-        sim_matrix: 1D array containing similarity values (lower triangular matrix)
-        id2idx_map: Mapping from ligand IDs to matrix indices
-        similarity_threshold: Threshold for high similarity (default 0.85)
-
-    Returns:
-        Dictionary with probability statistics for this cluster
-    """
-    # Counters for conditional probability calculation
     high_sim_both_in_cluster = 0  # P(both in cluster AND sim > threshold)
 
     # Additional counters for comprehensive analysis
@@ -214,12 +221,11 @@ def calculate_cluster_probabilities_all_clusters(
     return cluster_results
 
 
-# TODO: use np.linspace to calculate threshold values (take in from args)
 def analyze_probability_vs_threshold_per_cluster(
     l2c_df: pl.DataFrame,
     sim_matrix: np.ndarray,
     id2idx_map: dict,
-    thresholds: list[float] = [0.75, 0.85, 0.95],
+    thresholds: list[float],
     group_col: str = "cluster",
     id_col: str = "molregno",
 ) -> pl.DataFrame:
@@ -238,7 +244,7 @@ def analyze_probability_vs_threshold_per_cluster(
 
         for cluster_id, stats in cluster_results.items():
             result_row = {
-                "cluster_id": cluster_id,
+                group_col: cluster_id,
                 "threshold": threshold,
                 "conditional_probability": stats["conditional_probability"],
                 "baseline_probability": stats["baseline_probability"],
@@ -255,6 +261,7 @@ def run_probability_analysis(
     l2c_df: pl.DataFrame,
     sim_matrix: np.ndarray,
     id2idx_map: dict,
+    thresholds: list[float],
     tsv_save_path: str,
     group_col: str = "cluster",
     id_col: str = "molregno",
@@ -265,7 +272,7 @@ def run_probability_analysis(
 
     # Threshold sweep analysis
     threshold_analysis = analyze_probability_vs_threshold_per_cluster(
-        l2c_df, sim_matrix, id2idx_map, group_col=group_col, id_col=id_col
+        l2c_df, sim_matrix, id2idx_map, thresholds, group_col=group_col, id_col=id_col
     )
 
     # Save results
@@ -282,6 +289,12 @@ def main():
     sim_matrix = np.load(args.similarity_npy_file)
     check_size(sim_matrix, N)
 
+    thresholds = np.linspace(
+        args.similarity_threshold_min,
+        args.similarity_threshold_max,
+        args.similarity_threshold_N,
+    )
+
     prob_analysis_dir = args.prob_analysis_dir
     os.makedirs(prob_analysis_dir, exist_ok=True)
 
@@ -295,7 +308,7 @@ def main():
             prob_analysis_dir,
             f"per_cluster_threshold_analysis_class_level={cl}.tsv",
         )
-        run_probability_analysis(l2c_df, sim_matrix, id2idx_map, save_path)
+        run_probability_analysis(l2c_df, sim_matrix, id2idx_map, thresholds, save_path)
 
     # save per tid sim values (if requested)
     if args.ligand2tid_tsv_file is not None:
@@ -310,11 +323,15 @@ def main():
             ligand2tid_df,
             sim_matrix,
             id2idx_map,
+            thresholds,
             save_path,
             group_col="tid",
         )
 
     if args.activities_tsv_file is not None:
+        print(
+            "WARNING: The probability analysis done here is only looking at the population of active ligands across the protein family you provided. When looking at assays, it perhaps would make more sense to look at all of the tested compounds within each assay (this is not currently implemented)"
+        )
         assay2tid_df = pl.read_csv(
             args.activities_tsv_file, separator="\t", columns=["molregno", "assay_id"]
         )
@@ -326,6 +343,7 @@ def main():
             assay2tid_df,
             sim_matrix,
             id2idx_map,
+            thresholds,
             save_path,
             group_col="assay_id",
         )
