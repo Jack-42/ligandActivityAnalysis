@@ -48,3 +48,8 @@ MAX_N_COMPOUNDS: 20000
 SIMILARITY_THRESHOLD_MIN: 0.2
 SIMILARITY_THRESHOLD_MAX: 0.9
 SIMILARITY_THRESHOLD_N: 8
+
+# DISTRIBUTION STAT ANALYSIS
+# analyzing statistics/creating visualizations is expensive and
+# may not make sense for all class levels (say class_levels with more than 15 families)
+STAT_CLASS_LEVEL: 4

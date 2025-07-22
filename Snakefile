@@ -44,6 +44,12 @@ SIMILARITY_NPY_FILE = os.path.join(
 SIMILARITY_ID_PKL_FILE = os.path.join(STRUCTURE_SUBDIR, "similarity_id_list.pkl")
 CLUSTER2SIM_DIR = os.path.join(DATA_SUBDIR, "processed_similarity_cluster_data")
 PROB_ANALYSIS_DIR = os.path.join(DATA_SUBDIR, "cluster_stats")
+# perhaps would be cleaner to allow for multiple class levels, but not sure if that feature would ever be used
+TEST_RESULTS_DIR = os.path.join(DATA_SUBDIR, "statistical_tests")
+MANN_WHITNEY_UTEST_TSV_FILE = os.path.join(
+    TEST_RESULTS_DIR,
+    f"mann_whitney_utest_class_level={config["STAT_CLASS_LEVEL"]}.tsv",
+)
 
 
 rule all:
@@ -53,6 +59,7 @@ rule all:
         FAMILY_TREE_PNG_FILE,
         CLUSTER2SIM_DIR,
         PROB_ANALYSIS_DIR,
+        MANN_WHITNEY_UTEST_TSV_FILE,
 
 
 rule get_protein_targets:
@@ -373,4 +380,31 @@ rule probability_analysis:
         "--similarity_threshold_min {params.similarity_threshold_min} "
         "--similarity_threshold_max {params.similarity_threshold_max} "
         "--similarity_threshold_N {params.similarity_threshold_N} "
+        " > {log} 2>&1 "
+
+
+rule mann_whitney_utest:
+    input:
+        similarity_npy_file=SIMILARITY_NPY_FILE,
+        similarity_id_pkl_file=SIMILARITY_ID_PKL_FILE,
+        cluster2sim_dir=CLUSTER2SIM_DIR,
+        cluster_dir=CLUSTER_DIR,
+        family_details_tsv_file=FAMILY_DETAILS_TSV_FILE,
+    output:
+        mann_whitney_utest_tsv_file=MANN_WHITNEY_UTEST_TSV_FILE,
+    params:
+        class_level=config["STAT_CLASS_LEVEL"],
+    log:
+        "logs/mann_whitney_utest/all.log",
+    benchmark:
+        "benchmark/mann_whitney_utest/all.tsv"
+    shell:
+        "python src/mann_whitney_utest.py "
+        "--similarity_npy_file '{input.similarity_npy_file}' "
+        "--similarity_id_pkl_file '{input.similarity_id_pkl_file}' "
+        "--cluster2sim_dir '{input.cluster2sim_dir}' "
+        "--cluster_dir '{input.cluster_dir}' "
+        "--family_details_tsv_file '{input.family_details_tsv_file}' "
+        "--mann_whitney_utest_tsv_file '{output.mann_whitney_utest_tsv_file}' "
+        "--class_level {params.class_level} "
         " > {log} 2>&1 "
