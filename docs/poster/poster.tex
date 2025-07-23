@@ -141,7 +141,26 @@ This work investigates whether ligands which are active within a particular kina
         \caption{Comparison of 2D structural similarity distributions by kinase group}
         \label{violin_plot}
     \end{figure}
- 
+    
+    % TODO: may want to change how p-values reported
+    \begin{table}[!ht]
+    \centering
+    \begin{tabular}{l|l|l|l|l}
+        \hline
+        \textbf{Kinase Group} & \textbf{N. Ligands} & \textbf{Group Median} &\textbf{Comparison Median} & \textbf{p-value} \\ \hline
+        CK1 & 13 & 0.407 & 0.129 & 3.10e-11 \\ \hline
+        STE & 425 & 0.131 & 0.129 & 2.48e-169 \\ \hline
+        ATYPICAL & 357 & 0.149 & 0.129 & < 5e-324 \\ \hline
+        CAMK & 597 & 0.117 & 0.130 & 1.0 \\ \hline
+        AGC & 809 & 0.116 & 0.131 & 1.0 \\ \hline
+        TKL & 810 & 0.133 & 0.129 & < 5e-324 \\ \hline
+        CMGC & 1275 & 0.122 & 0.130 & 1.0 \\ \hline
+        OTHER & 727 & 0.127 & 0.129 & 1.0 \\ \hline
+        TK & 5347 & 0.140 & 0.121 & < 5e-324 \\ \hline
+    \end{tabular}
+    \caption{Table showing comparisons of similarity distributions per kinase group. Shown p-values are calculated from a Mann-Whitney U-test testing whether the distribution of similarity values within the group is stochastically greater than the distribution of other similarity values. A Bonferroni correction was applied to all p-values. Note that p-values of $< 5e-324$ are due to the reported p-value being 0, so the smallest absolute positive float greater than 0 was reported.}
+    \end{table}
+
  % TODO: include enrichment plots 
  % TODO: add dist. plots for assays and targets
  % TODO: add assay-ligand scatterplot
