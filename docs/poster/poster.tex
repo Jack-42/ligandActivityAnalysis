@@ -98,7 +98,7 @@ This work investigates whether ligands which are active within a particular kina
 
   \end{block}
 
-  \begin{block}{Methodology Overview}
+  \begin{block}{Methodology}
     The set of active ligands and their relationship to specific kinase proteins/groups was determined using data from single protein target binding assays in the ChEMBL database~\cite{chembl_db_2023}. 
     \begin{itemize}
         \item Assay/ligand selection based on Pharos~\cite{pharos_2022}
@@ -135,35 +135,39 @@ This work investigates whether ligands which are active within a particular kina
 
   \begin{block}{Results}
 
+    Figure~\ref{violin_plot} provides distributions for the ${N\choose 2}$ similarity values per group ($N$ = number of ligands), as well as the ${9,995 \choose 2} = 49,945,015$ similarity values calcualted for all kinase ligands in the dataset. Table~\ref{results_table} provides additional statistics for each group, as well as results from a Mann-Whitney U test (MWUT).
     \begin{figure}
         \centering
-        \includegraphics[width=\textwidth]{figures/violin_plot.png}
+        \includegraphics[width=0.75\textwidth]{figures/violin_plot.png}
         \caption{Comparison of 2D structural similarity distributions by kinase group}
         \label{violin_plot}
     \end{figure}
     
-    % TODO: may want to change how p-values reported
     \begin{table}[!ht]
     \centering
-    \begin{tabular}{l|l|l|l|l}
+    \small
+    \begin{tabular}{l|l|l|l|l|l}
         \hline
-        \textbf{Kinase Group} & \textbf{N. Ligands} & \textbf{Group Median} &\textbf{Comparison Median} & \textbf{p-value} \\ \hline
-        CK1 & 13 & 0.407 & 0.129 & 3.10e-11 \\ \hline
-        STE & 425 & 0.131 & 0.129 & 2.48e-169 \\ \hline
-        ATYPICAL & 357 & 0.149 & 0.129 & < 5e-324 \\ \hline
-        CAMK & 597 & 0.117 & 0.130 & 1.0 \\ \hline
-        AGC & 809 & 0.116 & 0.131 & 1.0 \\ \hline
-        TKL & 810 & 0.133 & 0.129 & < 5e-324 \\ \hline
-        CMGC & 1275 & 0.122 & 0.130 & 1.0 \\ \hline
-        OTHER & 727 & 0.127 & 0.129 & 1.0 \\ \hline
-        TK & 5347 & 0.140 & 0.121 & < 5e-324 \\ \hline
+        \textbf{Kinase Group} & \textbf{N. Targets} & \textbf{N. Ligands} & \textbf{Group Median} &\textbf{Comparison Median} & \textbf{MWUT p-value} \\ \hline
+        CK1 & 10 & 13 & 0.407 & 0.129 & $3.10 \times 10^{-11}$ \\ \hline
+        STE & 45 & 425 & 0.131 & 0.129 & $2.48e \times 10^{-169}$ \\ \hline
+        ATYPICAL & 15 & 357 & 0.149 & 0.129 & $< 5 \times 10^{-324}$ \\ \hline
+        CAMK & 65 & 597 & 0.117 & 0.130 & $1.0$ \\ \hline
+        AGC & 59 & 809 & 0.116 & 0.131 & $1.0$ \\ \hline
+        TKL & 37 & 810 & 0.133 & 0.129 & $< 5 \times 10^{-324}$ \\ \hline
+        CMGC & 58 & 1275 & 0.122 & 0.130 & $1.0$ \\ \hline
+        OTHER & 56 & 727 & 0.127 & 0.129 & $1.0$ \\ \hline
+        TK & 80 & 5347 & 0.140 & 0.121 & $< 5 \times 10^{-324}$ \\ \hline
     \end{tabular}
-    \caption{Table showing comparisons of similarity distributions per kinase group. Shown p-values are calculated from a Mann-Whitney U-test testing whether the distribution of similarity values within the group is stochastically greater than the distribution of other similarity values. A Bonferroni correction was applied to all p-values. Note that p-values of $< 5e-324$ are due to the reported p-value being 0, so the smallest absolute positive float greater than 0 was reported.}
+    \caption{Table showing comparisons of targets, ligands, and ligand similarity distributions per kinase group. Shown p-values are calculated (with Bonferroni correction) from a MWUT where the alternative hypothesis is that the similarity values within the group are stochastically greater than the distribution of all similarity values.}\label{results_table}
     \end{table}
 
- % TODO: include enrichment plots 
- % TODO: add dist. plots for assays and targets
- % TODO: add assay-ligand scatterplot
+    \begin{figure}
+        \centering
+        \includegraphics[width=0.75\textwidth]{figures/enrichment_factor_by_group.png}
+        \caption{Plot of enrichment values}
+        \label{enrichment_plot}
+    \end{figure}
 
   \end{block}
 
@@ -174,13 +178,22 @@ This work investigates whether ligands which are active within a particular kina
 \begin{column}{\colwidth} 
   \begin{block}{Discussion}
     \heading{Limitations}
-    \begin{itemize} 
+    \begin{itemize}
+        \item Not all protein targets are equally well-studied (see Figure~\ref{assay_vs_ligand_plot})
         \item Only considered Morgan fingerprints + Tanimoto coefficients when measuring ``similarity'' of ligands
         \item Methodology does not account for differences in assay conditions
         \item Data gathered from ChEMBL may not reflect global trends
     \end{itemize}
+
+    \begin{figure}
+        \centering
+        \includegraphics[width=\textwidth]{figures/assay_vs_ligand.png}
+        \caption{Scatterplots showing the number of assays (x-axis) and ligands (y-axis) for each protein belonging to each kinase group.}
+        \label{assay_vs_ligand_plot}
+    \end{figure}
+
     \heading{Conclusions}
-      Overall, this study found no clear relationship between kinase group and 2D ligand similarity. 
+      Overall, this study found no clear relationship between kinase group and 2D ligand similarity.
   \end{block}
 
   \begin{block}{Acknowledgement}
