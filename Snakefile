@@ -193,8 +193,7 @@ rule visualize_protein_family_tree:
         " > {log} 2>&1 "
 
 
-# TODO: rename this
-rule get_active_compounds:
+rule get_active_ligands:
     input:
         assay_tsv_file=ASSAYS_TSV_FILE,
     output:
@@ -210,11 +209,11 @@ rule get_active_compounds:
         CHEMBL_DB_PASSWORD=config["CHEMBL_DB_PASSWORD"],
         CHEMBL_DB_PORT=config["CHEMBL_DB_PORT"],
     log:
-        "logs/get_active_compounds/all.log",
+        "logs/get_active_ligands/all.log",
     benchmark:
-        "benchmark/get_active_compounds/all.tsv"
+        "benchmark/get_active_ligands/all.tsv"
     shell:
-        "python src/get_active_compounds.py "
+        "python src/get_active_ligands.py "
         "--db_name '{params.CHEMBL_DB_NAME}' "
         "--db_host '{params.CHEMBL_DB_HOST}' "
         "--db_user '{params.CHEMBL_DB_USER}' "
@@ -229,7 +228,8 @@ rule get_active_compounds:
         " > {log} 2>&1 "
 
 
-rule get_compound_structures:
+# TODO: could rename 'compound' to 'ligand' for consistency
+rule get_ligand_structures:
     input:
         activities_tsv_file=ACTIVITIES_TSV_FILE,
     output:
@@ -241,11 +241,11 @@ rule get_compound_structures:
         CHEMBL_DB_PASSWORD=config["CHEMBL_DB_PASSWORD"],
         CHEMBL_DB_PORT=config["CHEMBL_DB_PORT"],
     log:
-        "logs/get_compound_structures/all.log",
+        "logs/get_ligand_structures/all.log",
     benchmark:
-        "benchmark/get_compound_structures/all.tsv"
+        "benchmark/get_ligand_structures/all.tsv"
     shell:
-        "python src/get_compound_structures.py "
+        "python src/get_ligand_structures.py "
         "--db_name '{params.CHEMBL_DB_NAME}' "
         "--db_host '{params.CHEMBL_DB_HOST}' "
         "--db_user '{params.CHEMBL_DB_USER}' "
