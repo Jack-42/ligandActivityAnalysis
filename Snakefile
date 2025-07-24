@@ -177,6 +177,9 @@ rule visualize_protein_family_tree:
         family_details_tsv_file=FAMILY_DETAILS_TSV_FILE,
     output:
         out_path=FAMILY_TREE_PNG_FILE,
+    params:
+        major_family_short_names=config["MAJOR_FAMILY_SHORT_NAMES"],
+        pallette=config["PALLETTE"],
     log:
         "logs/visualize_protein_family_tree/all.log",
     benchmark:
@@ -185,9 +188,12 @@ rule visualize_protein_family_tree:
         "python src/visualize_protein_family_tree.py "
         "--family_details_tsv_file '{input.family_details_tsv_file}' "
         "--out_path '{output.out_path}' "
+        "--major_family_short_names '{params.major_family_short_names}' "
+        "--pallette '{params.pallette}' "
         " > {log} 2>&1 "
 
 
+# TODO: rename this
 rule get_active_compounds:
     input:
         assay_tsv_file=ASSAYS_TSV_FILE,

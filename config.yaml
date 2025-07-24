@@ -18,6 +18,10 @@ ORGANISM: "Homo sapiens"
 TARGET_TYPE: "SINGLE PROTEIN"
 PROTEIN_CLASS_ID: 1100 # 1100 corresponds to protein kinase family - see protein_classification table
 
+# FAMILY TREE VISUALIZATION
+MAJOR_FAMILY_SHORT_NAMES: "CK1,STE,ATYPICAL,CAMK,AGC,TKL,CMGC,OTHER,TK"
+PALLETTE: "hls" # seaborn pallette, colors generated in order of MAJOR_FAMILY_SHORT_NAMES
+
 # ASSAY SELECTION
 ASSAY_TYPE: "B" # B=binding, see https://chembl.gitbook.io/chembl-interface-documentation/frequently-asked-questions/chembl-data-questions#what-is-the-assay-type
 CONFIDENCE_SCORE: 9
