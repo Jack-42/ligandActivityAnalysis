@@ -52,7 +52,7 @@
 % ====================
 
 \footercontent{
-  \href{https://github.com/Jack-42/https://github.com/Jack-42/ligandActivityAnalysis}{GitHub: https://github.com/Jack-42/ligandActivityAnalysis} \hfill
+  \href{https://github.com/Jack-42/ligandActivityAnalysis}{GitHub: https://github.com/Jack-42/ligandActivityAnalysis} \hfill
 CFDE Summer Internship at UNM, 2025 \hfill
 {johnjack0987@gmail.com}}
 % (can be left out to remove footer)
@@ -88,7 +88,7 @@ CFDE Summer Internship at UNM, 2025 \hfill
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.7\textwidth]{figures/protein_family_tree.png}
+    \includegraphics[width=0.7\textwidth]{../figures/protein_family_tree.png}
     \caption{Phylogenetic Tree of the Human Kinome showing major groups as well as families and subfamilies. Generated using ETE4 with data from CheMBL.}
     \label{fam_tree}
 \end{figure}
@@ -145,7 +145,7 @@ This work investigates whether ligands which are active within a particular kina
     Figure~\ref{violin_plot} provides distributions for the ${N\choose 2}$ similarity values per group ($N$ = number of ligands), as well as the ${9,995 \choose 2} = 49,945,015$ similarity values calcualted for all kinase ligands in the dataset. Table~\ref{results_table} provides additional statistics for each group, as well as results from a Mann-Whitney U test (MWUT).
     \begin{figure}
         \centering
-        \includegraphics[width=0.75\textwidth]{figures/violin_plot.png}
+        \includegraphics[width=0.75\textwidth]{../figures/violin_plot.png}
         \caption{Comparison of 2D structural similarity distributions by kinase group}
         \label{violin_plot}
     \end{figure}
@@ -157,7 +157,7 @@ This work investigates whether ligands which are active within a particular kina
         \hline
         \textbf{Kinase Group} & \textbf{N. Targets} & \textbf{N. Ligands} & \textbf{Group Median} &\textbf{Comparison Median} & \textbf{MWUT p-value} \\ \hline
         CK1 & 10 & 13 & 0.407 & 0.129 & $3.10 \times 10^{-11}$ \\ \hline
-        STE & 45 & 425 & 0.131 & 0.129 & $2.48e \times 10^{-169}$ \\ \hline
+        STE & 45 & 425 & 0.131 & 0.129 & $2.48 \times 10^{-169}$ \\ \hline
         ATYPICAL & 15 & 357 & 0.149 & 0.129 & $< 5 \times 10^{-324}$ \\ \hline
         CAMK & 65 & 597 & 0.117 & 0.130 & $1.0$ \\ \hline
         AGC & 59 & 809 & 0.116 & 0.131 & $1.0$ \\ \hline
@@ -171,7 +171,7 @@ This work investigates whether ligands which are active within a particular kina
 
     \begin{figure}
         \centering
-        \includegraphics[width=0.75\textwidth]{figures/enrichment_factor_by_group.png}
+        \includegraphics[width=0.75\textwidth]{../figures/enrichment_factor_by_group.png}
         \caption{Plot of enrichment values}
         \label{enrichment_plot}
     \end{figure}
@@ -195,7 +195,7 @@ This work investigates whether ligands which are active within a particular kina
 
     \begin{figure}
         \centering
-        \includegraphics[width=\textwidth]{figures/assay_vs_ligand.png}
+        \includegraphics[width=\textwidth]{../figures/assay_vs_ligand.png}
         \caption{Scatterplots showing the number of assays (x-axis) and ligands (y-axis) for each protein belonging to each kinase group.}
         \label{assay_vs_ligand_plot}
     \end{figure}
