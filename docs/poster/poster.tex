@@ -82,9 +82,16 @@ CFDE Summer Internship at UNM, 2025 \hfill
 
   \begin{block}{Background and Overview}
   \heading{Background}
+   \small
    Protein kinases are relevant to a large number of human pathologies, including cancer, immune disorders, and infectious diseases. Protein Kinases have been classified into several different groups (a.k.a. ``families''). These classifications are based on sequence similarity, evolutionary conservation, and known functions. 
 
-% TODO: include image of kinase family tree here
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/protein_family_tree.png}
+    \caption{Phylogenetic Tree of the Human Kinome showing major groups as well as families and subfamilies. Generated using ETE4 with data from CheMBL.}
+    \label{fam_tree}
+\end{figure}
 
 The similarity property principle (SPP), has been enormously influential in the realm of medicinal chemistry~\cite{maggiora_vogt_stumpfe_bajorath_2013}. According to the SPP, structurally-similar compounds often exhibit similar properties. Among these properties is biological activity, such that similar compounds often demonstrate similar activity. 
 
@@ -99,6 +106,7 @@ This work investigates whether ligands which are active within a particular kina
   \end{block}
 
   \begin{block}{Methodology}
+    \small
     The set of active ligands and their relationship to specific kinase proteins/groups was determined using data from single protein target binding assays in the ChEMBL database~\cite{chembl_db_2023}. 
     \begin{itemize}
         \item Assay/ligand selection based on Pharos~\cite{pharos_2022}
@@ -125,7 +133,6 @@ This work investigates whether ligands which are active within a particular kina
 
     After determining the set of ligands and their group relationship(s), Morgan fingerprints were computed using RDKit. Tanimoto similarity coefficients were then computed between these 2D fingerprints. 
 
-    % TODO: include image with ligand pairs and tanimoto coeff values
   \end{block}
 \end{column}
 
@@ -134,7 +141,7 @@ This work investigates whether ligands which are active within a particular kina
 \begin{column}{\colwidth}
 
   \begin{block}{Results}
-
+    \small
     Figure~\ref{violin_plot} provides distributions for the ${N\choose 2}$ similarity values per group ($N$ = number of ligands), as well as the ${9,995 \choose 2} = 49,945,015$ similarity values calcualted for all kinase ligands in the dataset. Table~\ref{results_table} provides additional statistics for each group, as well as results from a Mann-Whitney U test (MWUT).
     \begin{figure}
         \centering
@@ -177,6 +184,7 @@ This work investigates whether ligands which are active within a particular kina
 
 \begin{column}{\colwidth} 
   \begin{block}{Discussion}
+    \small
     \heading{Limitations}
     \begin{itemize}
         \item Not all protein targets are equally well-studied (see Figure~\ref{assay_vs_ligand_plot})
@@ -193,6 +201,7 @@ This work investigates whether ligands which are active within a particular kina
     \end{figure}
 
     \heading{Conclusions}
+      \small
       Overall, this study found no clear relationship between kinase group and 2D ligand similarity.
   \end{block}
 
