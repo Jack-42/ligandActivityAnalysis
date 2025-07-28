@@ -12,7 +12,7 @@
 % ====================
 
 \usepackage[T1]{fontenc}
- \usepackage[utf8]{luainputenc}
+\usepackage[utf8]{luainputenc}
 \usepackage{lmodern}
 \usepackage[size=custom, width=125,height=93, scale=1.2]{beamerposter}
 \usetheme{gemini}
@@ -23,6 +23,7 @@
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.14}
 \usepackage{anyfontsize}
+\usepackage[font=small,skip=1pt]{caption}
 
 % ====================
 % Lengths
@@ -35,8 +36,10 @@
 \setlength{\sepwidth}{0.025\paperwidth}
 \setlength{\colwidth}{0.3\paperwidth}
 
+
 \newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
 
+\setlength{\parskip}{1em}
 % ====================
 % Title
 % ====================
@@ -83,35 +86,34 @@ CFDE Summer Internship at UNM, 2025 \hfill
   \begin{block}{Background and Overview}
   \heading{Background}
    \small
-   Protein kinases are relevant to a large number of human pathologies, including cancer, immune disorders, and infectious diseases. Protein Kinases have been classified into several different groups (a.k.a. ``families''). These classifications are based on sequence similarity, evolutionary conservation, and known functions. 
 
+ There are 8 major groups within the human kinome, which include: AGC, CAMK, CK1, CMGC, STE, TK, TKL, Other, as well as 13 atypical families~\cite{eid_turk_volkamer_rippmann_fulle_2017, manning_2002}. Aside from the ``Atypical'' and ``Other'' groups, these group classifications are generally based on sequence similarity, evolutionary conservation, and known functions. 
 
-\begin{figure}
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{../figures/protein_family_tree.png}
-    \caption{Phylogenetic Tree of the Human Kinome showing major groups as well as families and subfamilies. Generated using ETE4 with data from CheMBL.}
-    \label{fam_tree}
+    \includegraphics[width=0.5\textwidth]{../figures/protein_family_tree.png}
+    \caption{Phylogenetic Tree of the human kinome showing major groups as well as families and subfamilies. Generated using ETE4 with data from CheMBL.}
+    \label{fig:fam_tree}
 \end{figure}
 
-The similarity property principle (SPP), has been enormously influential in the realm of medicinal chemistry~\cite{maggiora_vogt_stumpfe_bajorath_2013}. According to the SPP, structurally-similar compounds often exhibit similar properties. Among these properties is biological activity, such that similar compounds often demonstrate similar activity. 
+The similarity property principle (SPP), has been enormously influential in the realm of medicinal chemistry~\cite{maggiora_vogt_stumpfe_bajorath_2013}. According to the SPP, structurally-similar compounds often exhibit similar properties (including biological activity). 
 
 This work investigates whether ligands which are active within a particular kinase group are more similar to one another than kinase ligands generally. 
     \heading{Why is this important?}
     \begin{itemize}
         \item Relevant to drug discovery research
         \item If there is a relationship between kinase group and ligand similarity, then it may be informative to look at the ligands of related kinases (i.e., those belonging to the same group)
-        \item There may not be much information on a particular protein target, but related and more well-studied proteins could potentially be informative
     \end{itemize}
 
   \end{block}
 
-  \begin{block}{Methodology}
+  \begin{block}{Dataset and Methodology}
     \small
-    The set of active ligands and their relationship to specific kinase proteins/groups was determined using data from single protein target binding assays in the ChEMBL database~\cite{chembl_db_2023}. 
+    The set of active ligands and their relationship to specific human protein kinases was determined using data from single protein target binding assays in the ChEMBL database~\cite{chembl_db_2023}. 
     \begin{itemize}
         \item Assay/ligand selection based on Pharos~\cite{pharos_2022}
         \item Remove assays where target was a variant/mutant
-        \item Filtered out PAINS compounds
+        \item Filtered out PAINS compounds~\cite{baell_holloway_2010}
         \item Molecular weight of ligand must fall between [200, 900] Da
     \end{itemize}
 
@@ -119,19 +121,28 @@ This work investigates whether ligands which are active within a particular kina
 
     \begin{table}[!ht]
     \centering
+    \small
     \begin{tabular}{l|l}
         \hline
         \textbf{Variable} & \textbf{Value} \\ \hline
         N. Protein Targets & 423 \\ \hline
         N. Assays & 73,487 \\ \hline
-        N. Assay-Ligand Pairs & 38,622 \\ \hline
+        N. Active Samples & 38,622 \\ \hline
         N. Unique Ligands & 9,995 \\ \hline
     \end{tabular}
     \end{table}
 
-    Ligands are considered active within a Kinase group if they were identified as an active within an assay targeting a protein belonging to the group. 
+    Ligands are considered active within a kinase group if they were identified as an active within an assay targeting a protein belonging to the group. 
 
-    After determining the set of ligands and their group relationship(s), Morgan fingerprints were computed using RDKit. Tanimoto similarity coefficients were then computed between these 2D fingerprints. 
+    After determining the set of ligands and their group relationship(s), Morgan fingerprints were computed using RDKit. Tanimoto similarity coefficients were then computed between these 2D fingerprints. Figure~\ref{ligand_sim} shows the 2D structures of some ligand pairs and their similarity values.
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{../figures/ligand_sim.png}
+    \caption{Pairs of kinase ligands and their Tanimoto similarity values (from left to right: 0, 0.5, 1).}
+    \label{ligand_sim}
+\end{figure}
+
+ 
 
   \end{block}
 \end{column}
@@ -152,7 +163,7 @@ This work investigates whether ligands which are active within a particular kina
     
     \begin{table}[!ht]
     \centering
-    \small
+    \footnotesize
     \begin{tabular}{l|l|l|l|l|l}
         \hline
         \textbf{Kinase Group} & \textbf{N. Targets} & \textbf{N. Ligands} & \textbf{Group Median} &\textbf{Comparison Median} & \textbf{MWUT p-value} \\ \hline
@@ -168,11 +179,15 @@ This work investigates whether ligands which are active within a particular kina
     \end{tabular}
     \caption{Table showing comparisons of targets, ligands, and ligand similarity distributions per kinase group. Shown p-values are calculated (with Bonferroni correction) from a MWUT where the alternative hypothesis is that the similarity values within the group are stochastically greater than the distribution of all similarity values.}\label{results_table}
     \end{table}
-
+    Figure~\ref{enrichment_plot} below shows the enrichment values observed for different kinase groups, where enrichment is defined as:
+    \begin{equation*}
+        \footnotesize
+        \frac{P(\text{two ligands active within same family} \; | \; \text{similarity} > \text{threshold})}{P(\text{two ligands active within same family})}
+    \end{equation*}
     \begin{figure}
         \centering
-        \includegraphics[width=0.75\textwidth]{../figures/enrichment_factor_by_group.png}
-        \caption{Plot of enrichment values}
+        \includegraphics[width=0.85\textwidth]{../figures/enrichment_factor_by_group.png}
+        \caption{Plot of enrichment values by kinase group.}
         \label{enrichment_plot}
     \end{figure}
 
@@ -189,20 +204,20 @@ This work investigates whether ligands which are active within a particular kina
     \begin{itemize}
         \item Not all protein targets are equally well-studied (see Figure~\ref{assay_vs_ligand_plot})
         \item Only considered Morgan fingerprints + Tanimoto coefficients when measuring ``similarity'' of ligands
-        \item Methodology does not account for differences in assay conditions
+        \item Methodology does not directly account for differences in assay conditions, or the fact that even single proteins can have multiple binding sites
         \item Data gathered from ChEMBL may not reflect global trends
     \end{itemize}
 
     \begin{figure}
         \centering
-        \includegraphics[width=\textwidth]{../figures/assay_vs_ligand.png}
-        \caption{Scatterplots showing the number of assays (x-axis) and ligands (y-axis) for each protein belonging to each kinase group.}
+        \includegraphics[width=0.85\textwidth]{../figures/assay_vs_ligand.png}
+        \caption{Scatter plots showing the number of assays (x-axis) and ligands (y-axis) for each protein belonging to each kinase group.}
         \label{assay_vs_ligand_plot}
     \end{figure}
 
     \heading{Conclusions}
       \small
-      Overall, this study found no clear relationship between kinase group and 2D ligand similarity.
+      Overall, this study found no clear relationship between 2D ligand similarity and kinase group activity. Although significant differences were observed for the CK1 group, given the limitations outlined above further study is necessary before accepting these results. 
   \end{block}
 
   \begin{block}{Acknowledgement}
