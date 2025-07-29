@@ -3,7 +3,7 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{geometry}
-
+\usepackage{amsmath,amssymb}
 \geometry{
 a4paper,
 total={170mm,257mm},
@@ -29,9 +29,9 @@ top=20mm,
 
 \section*{Abstract}
 This work investigates whether there is a relationship between the 2D computational similarity of ligands and their activity within specific human protein kinase groups.  
-Using data from ChEMBL binding assays, the distribution of pairwise Tanimoto similarity coefficients values computed between all kinase ligands was compared against the distribution of pairwise similarity values computed with respect to ligands active within a specific kinase group. 
+Using data from ChEMBL binding assays, the distribution of pairwise Tanimoto similarity coefficients values computed between all protein kinase ligands was compared against the distribution of pairwise similarity values computed with respect to ligands active within a specific protein kinase group. 
 With the exception of the CK1 group, no significant group-specific differences were found. 
-These results suggest there is limited utility of 2D similarity metrics for identifying ligand selectivity across a majority of kinase groups. 
+These results suggest there is limited utility of 2D similarity metrics for identifying ligand selectivity across a majority of protein kinase groups. 
 However, given the many confounders that exist when performing large scale computational analyses of ChEMBL bioassay data these results are not definitive, and limitations as well as potential follow-ups are discussed in detail. 
 All code developed as part of this project can be found on GitHub: \href{https://github.com/Jack-42/ligandActivityAnalysis}{https://github.com/Jack-42/ligandActivityAnalysis}. 
 
@@ -44,18 +44,18 @@ The following sections provide a brief overview of protein kinases and their cla
 Given their (nearly impossible-to-overstate) importance in drug discovery, medicine, and biology + chemistry broadly, an immense amount of effort has been put into classifying proteins. 
 One of the most significant protein families studied by drug discovery researchers is the protein kinase family. 
 These protein kinases (PKs) are enzymes which modify the function of other proteins via phosophorylation~\cite{lubos_cipak_2022}. 
-PKs are involved in many important regulatory roles throughout the cell, and their dyregulation is linked to many types of cancer as well as immune, neurological and infectious diseases~\cite{cancer as well as immune, neurological and infectious diseases}. 
+PKs are involved in many important regulatory roles throughout the cell, and their dyregulation is linked to many types of cancer as well as immune, neurological and infectious diseases~\cite{bhullar_lagaron_mcgowan_parmar_jha_hubbard_rupasinghe_2018}. 
 Although all PKs perform phosophorylation, they do not all perform the same function (e.g., some PKs will target different protein domains than others). 
 
 One of the first kinase classifications was published by Manning and other researchers in 2002~\cite{manning_2002}. 
 Their research has resulted in the establishment of 8 major groups within the human kinome, which include: AGC, CAMK, CK1, CMGC, STE, TK, TKL, Other, as well as 13 atypical families~\cite{eid_turk_volkamer_rippmann_fulle_2017}.
-Generally speaking, these groups (as well as the families and subfamilies they contain) have been classified based on sequence similarity, evolutionary conservation, and known functions. The exception to this is the ``Atypical'' and ``Other'' groups, which serve to classify proteins which don't fit into the other major groups. 
+Generally speaking, these groups (as well as the families and subfamilies they contain) have been classified based on sequence similarity, evolutionary conservation, and known functions. The exceptions are the ``Atypical'' and ``Other'' groups, which serve to classify proteins that don't fit into the other major groups. 
 A phylogenetic tree of the human kinome is shown in Figure~\ref{fig:fam_tree}. % TODO: maybe rephrase here
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{../figures/protein_family_tree.png}
-    \caption{Phylogenetic Tree of the Human Kinome showing major groups as well as families and subfamilies. Generated using ETE4 with data from CheMBL.}
+    \caption{Phylogenetic Tree of the Human Kinome showing major groups as well as families and subfamilies. Generated using ETE4 with data from ChEMBL.}
     \label{fig:fam_tree}
 \end{figure}
 
@@ -65,13 +65,32 @@ The similarity property principle (SPP), has been enormously influential in the 
 According to the SPP, structurally-similar compounds often exhibit similar properties. 
 Among these properties is biological activity, such that similar compounds often demonstrate similar activity against identical biological targets (i.e., proteins in a majority of cases). 
 It is important to note that the definition of ``similar'' here is ambiguous, and can be measured in a myriad of ways. 
-Additionally, there exist so-called ``activity cliffs'', where a compound which shows high binding affinity (i.e., high activity) against a given target becomes completely ineffective after minor structural modifications~\cite{maggiora_vogt_stumpfe_bajorath_2013,filip_miljkovic_jurgen_bajorath_2018}.  
+Additionally, there exist so-called ``activity cliffs'', where a compound which shows high binding affinity (i.e., high activity) against a given target becomes completely ineffective after minor structural modifications~\cite{maggiora_vogt_stumpfe_bajorath_2013,filip_miljkovic_jurgen_bajorath_2018}. 
 
+There are many computational methods for computing molecular similarity between two compounds~\cite{molsim_2024}. Similarity calculations depend both on how compounds are represented (e.g., using molecular graphs, fingerprint vectors, etc), as well as the particular metric used. These similarity metrics typically report a value in the range 0 to 1, with values closer to 1 indicating a higher degree of structural similarity. In addition to computing pairwise similarity, dimensionality-reduction methods (e.g., U-MAP) can be used with clustering algorithms (e.g., K-means) to group together multiple structurally-similar compounds. Other clustering approaches make use of molecular scaffolds or other well-defined structural motifs.
 
-There are many computational methods for computing molecular similarity between two compounds [4]. Similarity calculations depend both on how compounds are represented (e.g., using molecular graphs, fingerprint vectors, etc), as well as the particular metric used. These similarity metrics typically report a value in the range 0 to 1, with values closer to 1 indicating a higher degree of structural similarity. In addition to computing pairwise similarity, dimensionality-reduction methods (e.g., U-MAP) can be used with clustering algorithms (e.g., K-means) to group together multiple structurally-similar compounds. Other clustering approaches make use of molecular scaffolds or other well-defined structural motifs.
+For the purposes of this project, ``similarity'' is determined using Tanimoto coefficients computed from Morgan fingerprints generated by RDKit~\cite{greg_landrum_2024_11396708}. 
+The family of Morgan fingerprints (also known as circular fingerprints or extended-connectivity fingerprints) are based upon an algorithm developed by H.L. Morgan~\cite{morgan_1965}. 
+The RDKit version of Morgan fingerprints is based upon the implementation described by Rogers and Hahn~\cite{rogers_hahn_2010}. 
+Although a detailed description of the Morgan fingerprint is outside the scope of this report, these fingerprints may be summarized as capturing the ``presence of specific circular substructures around each atom in a molecule''~\cite{capecchi_probst_reymond_2020}. 
+Morgan fingerprints were chosen because they are widely used within the field of cheminformatics due to (1) the fact that their features are predictive of biological activity and (2) they have proven to be among the best performing fingerprints in virtual screening~\cite{capecchi_probst_reymond_2020}. 
 
-For the purposes of this project... % TODO: tanimoto coeff explanation
+Like Morgan fingerprints, Tanimoto coefficients are widely adopted. 
+The Tanimoto coefficient $T(A,B)$ of two bit vectors $A$ and $B$ is computed by the following equation:
+\begin{equation}\label{eq:1}
+T(A,B) = \frac{|A \cap B|}{|A \cup B|} = \frac{|A \cap B|}{|A| + |B| - |A \cap B|} = \frac{\sum_{i=1}^{n} a_i b_i}{\sum_{i=1}^{n} a_i + \sum_{i=1}^{n} b_i - \sum_{i=1}^{n} a_i b_i}
+\end{equation}
+\noindent
+Tanimoto values range from 0 to 1, with values closer to 1 indicating a higher degree of similarity.
+Figure~\ref{fig:ligand_sim} provides a visualization of some pairs of protein kinase ligands identified in this project and their corresponding Tanimoto similarity value.
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{../figures/ligand_sim.png}
+    \caption{Pairs of protein kinase ligands and their Tanimoto similarity values (0, 0.5, 1).}
+    \label{fig:ligand_sim}
+\end{figure}
+ 
 \subsection*{Relevance to Drug Discovery}
 % With few exceptions, for a drug to produce an effect it must bind to specific components of cells and tissues~\cite{antolin_ameratunga_banerji_clarke_workman_al-lazikani_2020}. 
 % These biological targets are most commonly proteins, although they can also include nucleic acids and peptides~\cite{gashaw_ellinghaus_sommer_asadullah_2011}.  
@@ -90,8 +109,58 @@ Relatedly, previous works have investigated the theory of ``Target-Family-Privil
 Several works have developed computational analyses for looking at activity relationships between families~\cite{bajorath_2008}, and works such as \cite{filip_miljkovic_jurgen_bajorath_2018} and \cite{lo_liu_morrissey_kakiuchi-kiyota_johnson_broccatelli_zhong_joshi_altman_2018} have investigated the structures and activities of kinase inhibitors. 
 
 
-\section*{Methodology}\label{sec:methodology}
+\section*{Dataset and Methodology}\label{sec:methodology}
+Within this project all data was sourced from ChEMBL (version 35)~\cite{chembl_db_2023}. 
+The ChEMBL PostgreSQL database (DB) was downloaded onto a local computer and was then used to carry out data extraction and analysis. 
+A Snakemake~\cite{snakemake_2021} workflow was developed to extract relevant assays and ligands (see details below), and additional analyses were performed in Jupyter notebooks. 
+As mentioned in the abstract, all code developed as part of this project can be found on GitHub: \href{https://github.com/Jack-42/ligandActivityAnalysis}{https://github.com/Jack-42/ligandActivityAnalysis}. 
 
+The set of active ligands and their relationship to specific human protein kinases was determined using data from single protein target binding assays in the ChEMBL database (version 35)~\cite{chembl_db_2023}. 
+In identifying appropriate assays and ligands, the criteria used by Pharos~\cite{pharos_2022} was enforced to ensure that (1) assays were high-quality and (2) a reasonable definition of ``active'' was applied~\cite{pharos_2022}. 
+These criteria include the following:
+\begin{itemize}
+    \item Sample must have a pChEMBL value (i.e., a -Log M value)
+    \item Must be from a binding assay
+    \item Ligand must have a MOL structure type
+    \item Assay must have a target type of SINGLE\_PROTEIN
+    \item Sample must have standard\_flag = 1 and exact standard\_relation
+    \item Assay must be associated with a journal publication
+    \item Sample must have an activity value $\leq \; 30 \text{nM}$
+\end{itemize}
+
+In addition to the criteria from Pharos, other filters were also applied based on other prior research and consideration. In particular:
+\begin{itemize}
+    \item Remove assays where target was a variant/mutant (using implementation described by~\cite{landrum_riniker_2024}).
+    \item Filtered out PAINS compounds to remove (some) false positives~\cite{baell_holloway_2010}.
+    \item Molecular weight of ligand must fall between [200, 900] Da. The particular range is based upon~\cite{filip_miljkovic_jurgen_bajorath_2018}. 
+\end{itemize}
+
+The application of the criteria above to the ChEMBL database (version 35) resulted in a dataset described in Table~\ref{tab:1} below.
+
+\begin{table}[!ht]
+\centering
+\begin{tabular}{|l|l|}
+    \hline
+    \textbf{Variable} & \textbf{Value} \\ \hline
+    N. Protein Targets & 423 \\ \hline
+    N. Assays & 73,487 \\ \hline
+    N. Active Samples & 38,622 \\ \hline
+    N. Unique Ligands & 9,995 \\ \hline
+\end{tabular}
+\caption{Counts of proteins, assays, samples, and unique ligands in the dataset}\label{tab:1}
+\end{table}
+
+In terms of ligand-target relationships, these were directly inferred from the assays (i.e., if a ligand was present in an active sample in an assay where protein X was specified as the target, then the ligand was considered as active against protein X). 
+ChEMBL provides classification information for protein targets, and this information was used to assign ligands to respective kinase group(s) such that a ligand is considered active within a protein kinase group if they were identified as an active within an assay targeting a protein belonging to the group. 
+It is perhaps worth noting that, under this definition, a single ligand can belong to more than one kinase group. 
+Most commonly this is because the ligand has multitarget activity (i.e., it is active against more than one target, and these targets span more than one group). 
+However, there are also some rare cases where proteins have been classified into more than a single group by ChEMBL. 
+For example, \href{https://www.ebi.ac.uk/chembl/explore/target/CHEMBL3906}{Ribosomal protein S6 kinase alpha 2} belongs to both the AGC and CAMK group according to ChEMBL. 
+In these exceptional cases an inclusive approach is taken such that the protein (and any of its active ligands) are considered part of both groups. 
+
+After determining the set of ligands and their group relationships, Morgan fingerprints were computed using RDKit. 
+Tanimoto similarity coefficients were then computed between these 2D fingerprints. 
+These generated similarity values were clustered together using the ligand-group relationships described above and to generate the results described in the next section.
 \section*{Results}
 \subsection*{Distribution}
 
