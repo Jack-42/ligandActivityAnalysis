@@ -21,6 +21,8 @@ from utils.io import load_from_pkl
 from utils.ltm import check_size, get_id2idx_map, get_ltm_idx
 
 
+# TODO: it would likely make sense here to not consider similarity values for ligands active against same target
+# this way, you get a view of intra-group enrichment that is less susceptible to confounders (such as looking at ligands active against same assay)
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Compute probability values of interest for multiple clusters",
