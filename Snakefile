@@ -54,7 +54,7 @@ MANN_WHITNEY_UTEST_TSV_FILE = os.path.join(
 
 rule all:
     input:
-        APT_PNG_FILE,
+        # APT_PNG_FILE,
         FAMILY_DETAILS_TSV_FILE,
         FAMILY_TREE_PNG_FILE,
         CLUSTER2SIM_DIR,
