@@ -4,6 +4,7 @@
 \usepackage{float}
 \usepackage{geometry}
 \usepackage{amsmath,amssymb}
+\usepackage{changepage}
 \geometry{
 a4paper,
 total={170mm,257mm},
@@ -27,25 +28,25 @@ top=20mm,
 \maketitle
 
 
-\section*{Abstract}
+\section{Abstract}
 This work investigates whether there is a relationship between the 2D computational similarity of ligands and their activity within specific human protein kinase groups.  
 Using data from ChEMBL binding assays, the distribution of pairwise Tanimoto similarity coefficients values computed between all protein kinase ligands was compared against the distribution of pairwise similarity values computed with respect to ligands active within a specific protein kinase group. 
-With the exception of the CK1 group, no significant group-specific differences were found. 
+Except for the CK1 group, no significant group-specific differences were found. 
 These results suggest there is limited utility of 2D similarity metrics for identifying ligand selectivity across a majority of protein kinase groups. 
 However, given the many confounders that exist when performing large scale computational analyses of ChEMBL bioassay data these results are not definitive, and limitations as well as potential follow-ups are discussed in detail. 
 All code developed as part of this project can be found on GitHub: \href{https://github.com/Jack-42/ligandActivityAnalysis}{https://github.com/Jack-42/ligandActivityAnalysis}. 
 
-\section*{Introduction and Background}
-This work explores the relationship between 2D ligand similarity and the activity of these ligands with respect to major protein kinase families. 
+\section{Introduction and Background}
+This work explores the relationship between 2D ligand similarity and the activity of these ligands with respect to major protein kinase families, and in particular whether ligands which are active within a particular protein kinase group are more similar to one another than protein kinase ligands generally. 
 The following sections provide a brief overview of protein kinases and their classification, molecular similarity, the project's relevance to drug discovery, and related works.
 
 
-\subsection*{Protein Kinases}
+\subsection{Protein Kinases}
 Given their (nearly impossible-to-overstate) importance in drug discovery, medicine, and biology + chemistry broadly, an immense amount of effort has been put into classifying proteins. 
 One of the most significant protein families studied by drug discovery researchers is the protein kinase family. 
-These protein kinases (PKs) are enzymes which modify the function of other proteins via phosophorylation~\cite{lubos_cipak_2022}. 
-PKs are involved in many important regulatory roles throughout the cell, and their dyregulation is linked to many types of cancer as well as immune, neurological and infectious diseases~\cite{bhullar_lagaron_mcgowan_parmar_jha_hubbard_rupasinghe_2018}. 
-Although all PKs perform phosophorylation, they do not all perform the same function (e.g., some PKs will target different protein domains than others). 
+These protein kinases (PKs) are enzymes which modify the function of other proteins via phosphorylation~\cite{lubos_cipak_2022}. 
+PKs are involved in many important regulatory roles throughout the cell, and their dysregulation is linked to many types of cancer as well as immune, neurological and infectious diseases~\cite{bhullar_lagaron_mcgowan_parmar_jha_hubbard_rupasinghe_2018}. 
+Although all PKs perform phosphorylation, they do not all perform the same function (e.g., some PKs will target different protein domains than others). 
 
 One of the first kinase classifications was published by Manning and other researchers in 2002~\cite{manning_2002}. 
 Their research has resulted in the establishment of 8 major groups within the human kinome, which include: AGC, CAMK, CK1, CMGC, STE, TK, TKL, Other, as well as 13 atypical families~\cite{eid_turk_volkamer_rippmann_fulle_2017}.
@@ -60,14 +61,15 @@ A phylogenetic tree of the human kinome is shown in Figure~\ref{fig:fam_tree}. %
 \end{figure}
 
 
-\subsection*{Molecular Similarity}
+\subsection{Molecular Similarity}
 The similarity property principle (SPP), has been enormously influential in the realm of medicinal chemistry~\cite{maggiora_vogt_stumpfe_bajorath_2013}. 
 According to the SPP, structurally-similar compounds often exhibit similar properties. 
 Among these properties is biological activity, such that similar compounds often demonstrate similar activity against identical biological targets (i.e., proteins in a majority of cases). 
 It is important to note that the definition of ``similar'' here is ambiguous, and can be measured in a myriad of ways. 
 Additionally, there exist so-called ``activity cliffs'', where a compound which shows high binding affinity (i.e., high activity) against a given target becomes completely ineffective after minor structural modifications~\cite{maggiora_vogt_stumpfe_bajorath_2013,filip_miljkovic_jurgen_bajorath_2018}. 
 
-There are many computational methods for computing molecular similarity between two compounds~\cite{molsim_2024}. Similarity calculations depend both on how compounds are represented (e.g., using molecular graphs, fingerprint vectors, etc), as well as the particular metric used. These similarity metrics typically report a value in the range 0 to 1, with values closer to 1 indicating a higher degree of structural similarity. In addition to computing pairwise similarity, dimensionality-reduction methods (e.g., U-MAP) can be used with clustering algorithms (e.g., K-means) to group together multiple structurally-similar compounds. Other clustering approaches make use of molecular scaffolds or other well-defined structural motifs.
+There are many computational methods for computing molecular similarity between two compounds~\cite{molsim_2024}. Similarity calculations depend both on how compounds are represented (e.g., using molecular graphs, fingerprint vectors, etc) and the particular metric used. 
+These similarity metrics typically report a value in the range 0 to 1, with values closer to 1 indicating a higher degree of structural similarity. In addition to computing pairwise similarity, dimensionality-reduction methods (e.g., U-MAP) can be used with clustering algorithms (e.g., K-means) to group together multiple structurally-similar compounds. Other clustering approaches make use of molecular scaffolds or other well-defined structural motifs.
 
 For the purposes of this project, ``similarity'' is determined using Tanimoto coefficients computed from Morgan fingerprints generated by RDKit~\cite{greg_landrum_2024_11396708}. 
 The family of Morgan fingerprints (also known as circular fingerprints or extended-connectivity fingerprints) are based upon an algorithm developed by H.L. Morgan~\cite{morgan_1965}. 
@@ -91,7 +93,7 @@ Figure~\ref{fig:ligand_sim} provides a visualization of some pairs of protein ki
     \label{fig:ligand_sim}
 \end{figure}
  
-\subsection*{Relevance to Drug Discovery}
+\subsection{Relevance to Drug Discovery}
 % With few exceptions, for a drug to produce an effect it must bind to specific components of cells and tissues~\cite{antolin_ameratunga_banerji_clarke_workman_al-lazikani_2020}. 
 % These biological targets are most commonly proteins, although they can also include nucleic acids and peptides~\cite{gashaw_ellinghaus_sommer_asadullah_2011}.  
 % A molecule which is ``active'' (as measured by, for example, an IC50 value) against a given disease-related target may be a promising drug candidate. 
@@ -102,14 +104,14 @@ As mentioned above, protein kinases are involved in a number of human pathologie
 If there is a relationship between protein kinase group and ligand similarity, then it may be informative to look at the ligands of related kinases (i.e., those belonging to the same group). 
 This would be especially beneficial if there are few known ligands for the target of interest, as one could leverage data from well-studied, closely-related proteins to inform the discovery process. 
 
-\subsection*{Related Works}
+\subsection{Related Works}
 The idea that similar compounds may exhibit similar activities against proteins within the same family (or group) is not new. 
 The term ``intrafamily polypharmacology'' (IFP) refers to molecules which have demonstrated activity against multiple proteins belonging to the same family, and has been of special interest in (for instance) studying PARP-1 inhibitors~\cite{passeri_camaioni_liscio_sabbatini_ferri_carotti_giacchè_pellicciari_gioiello_macchiarulo_2015, antolin_ameratunga_banerji_clarke_workman_al-lazikani_2020}. 
 Relatedly, previous works have investigated the theory of ``Target-Family-Privileged Substructures'', which suggests that particular chemical substructures are strongly linked to activity against certain protein families~\cite{schnur_hermsmeier_tebben_2006}. 
 Several works have developed computational analyses for looking at activity relationships between families~\cite{bajorath_2008}, and works such as \cite{filip_miljkovic_jurgen_bajorath_2018} and \cite{lo_liu_morrissey_kakiuchi-kiyota_johnson_broccatelli_zhong_joshi_altman_2018} have investigated the structures and activities of kinase inhibitors. 
 
 
-\section*{Dataset and Methodology}\label{sec:methodology}
+\section{Dataset and Methodology}\label{sec:methodology}
 Within this project all data was sourced from ChEMBL (version 35)~\cite{chembl_db_2023}. 
 The ChEMBL PostgreSQL database (DB) was downloaded onto a local computer and was then used to carry out data extraction and analysis. 
 A Snakemake~\cite{snakemake_2021} workflow was developed to extract relevant assays and ligands (see details below), and additional analyses were performed in Jupyter notebooks. 
@@ -172,46 +174,100 @@ A breakdown of the number of proteins, assays, and ligands belonging to each pro
 After determining the set of ligands and their group relationships, Morgan fingerprints were computed using RDKit. 
 Tanimoto similarity coefficients were then computed between these 2D fingerprints. 
 These generated similarity values were clustered together using the ligand-group relationships described above and to generate the results described in the next section.
-\section*{Results}
-\subsection*{Distribution}
-To directly answer.
-Figure~\ref{violin_plot} provides distributions for the ${N\choose 2}$ similarity values per group ($N$ = number of ligands), as well as the ${9,995 \choose 2} = 49,945,015$ similarity values calcualted for all kinase ligands in the dataset. Table~\ref{results_table} provides additional statistics for each group, as well as results from a Mann-Whitney U test (MWUT).
+\section{Results}
+To directly answer the main research question of this study (are ligands which are active within a particular protein kinase group more similar to one another than protein kinase ligands generally?), one can directly compare the distribution of similarity values computed with respect to all $9,995$ ligands in the dataset to the distribution of similarity values computed with respect to the ligands of individual protein kinase groups. 
+These results are shown in Section~\ref{subsec:dist_results}. 
+In addition, results show that there is (on average) a relationship between similarity threshold and enrichment with respect to both intra-group activity as well as assay activity (Section~\ref{subsec:results_enrichment}). 
+However, as will be detailed in Section~\ref{sec:discussion}, there are several limitations to this study that must be accounted for before accepting any of the results presented below.
+ 
+\subsection{Distribution}\label{subsec:dist_results}
+Figure~\ref{fig:violin_plot} provides distributions for the ${N\choose 2}$ similarity values per group ($N$ = number of ligands), as well as the ${9,995 \choose 2} = 49,945,015$ similarity values calcualted for all kinase ligands in the dataset, with Table~\ref{tab:dist_stats} providing tthe statistics of each of distribution. 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{../figures/violin_plot.png}
-    \caption{Comparison of 2D structural similarity distributions by kinase group}
-    \label{violin_plot}
+    \caption{Comparison of 2D structural similarity distributions by kinase group. Due to computational limitations a maximum of 1,000,000 (randomly selected) similarity values are shown for each distribution (note this only impact the ``ALL KINASE'' and ``TK'' distributions). When performing statistical analyses the entire set of similarity values was always used.}
+    \label{fig:violin_plot}
 \end{figure}
 
 \begin{table}[!ht]
 \centering
-\resizebox{\textwidth}{!}{\begin{tabular}{|l|l|l|l|l|l|}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|l|l|l|l|l|l|l|}
     \hline
-    \textbf{Kinase Group} & \textbf{N. Targets} & \textbf{N. Ligands} & \textbf{Group Median} &\textbf{Comparison Median} & \textbf{MWUT p-value} \\ \hline
-    CK1 & 10 & 13 & 0.407 & 0.129 & $3.10 \times 10^{-11}$ \\ \hline
-    STE & 45 & 425 & 0.131 & 0.129 & $2.48 \times 10^{-169}$ \\ \hline
-    ATYPICAL & 15 & 357 & 0.149 & 0.129 & $< 5 \times 10^{-324}$ \\ \hline
-    CAMK & 65 & 597 & 0.117 & 0.130 & $1.0$ \\ \hline
-    AGC & 59 & 809 & 0.116 & 0.131 & $1.0$ \\ \hline
-    TKL & 37 & 810 & 0.133 & 0.129 & $< 5 \times 10^{-324}$ \\ \hline
-    CMGC & 58 & 1275 & 0.122 & 0.130 & $1.0$ \\ \hline
-    OTHER & 56 & 727 & 0.127 & 0.129 & $1.0$ \\ \hline
-    TK & 80 & 5347 & 0.140 & 0.121 & $< 5 \times 10^{-324}$ \\ \hline
+    \textbf{Distribution} & \textbf{N. Similarity Values} & \textbf{Mean} & \textbf{Median} & \textbf{Variance} & \textbf{Skewness} & \textbf{Kurtosis}\\ \hline
+    ALL KINASE & 49,945,015 & 0.136 & 0.129 & 0.003 & 3.384 & 26.476 \\ \hline
+    CK1 & 78 & 0.407 & 0.407 & 0.064 & 0.055 & -1.016 \\ \hline
+    STE & 90,100 & 0.152 & 0.131 & 0.009 & 4.041 & 20.209 \\ \hline
+    ATYPICAL & 63,546 & 0.180 & 0.149 & 0.014 & 3.095 & 11.453 \\ \hline
+    CAMK & 177,906 & 0.133 & 0.117 & 0.006 & 4.895 & 29.897 \\ \hline
+    AGC & 326,836 & 0.135 & 0.116 & 0.009 & 4.158 & 21.775 \\ \hline
+    TKL & 327,645 & 0.153 & 0.133 &  0.009 & 3.693 & 17.759 \\ \hline
+    CMGC & 812,175 & 0.144 & 0.122 & 0.009 & 3.829 & 17.676 \\ \hline
+    OTHER & 263,901 & 0.144 & 0.127 & 0.007 & 4.441 & 25.778 \\ \hline
+    TK & 14,292,531 & 0.153 & 0.140 & 0.004 & 3.176 & 18.678 \\ \hline
 \end{tabular}}
-\caption{Table showing comparisons of targets, ligands, and ligand similarity distributions per kinase group. Shown p-values are calculated (with Bonferroni correction) from a MWUT where the alternative hypothesis is that the similarity values within the group are stochastically greater than the distribution of all similarity values.}\label{results_table}
+\caption{Statistics for the distributions of ligand similarity values shown in Figure~\ref{fig:violin_plot}. Note that the number of similarity values belonging to each distribution will be equal to the number of pairs of ligands, i.e. ${N\choose 2}$.}\label{tab:dist_stats}
 \end{table}
 
+As can be seen from both Figure~\ref{fig:violin_plot} and Table~\ref{tab:dist_stats}, with the exception of the CK1 group there is not a clear difference between the similarity of ligands active within a single protein kinase group compared to the similarity of all protein kinase ligands. 
+To measure the statistical significance of these findings, a Mann-Whitney U test (MWUT)~\cite{mann_whitney_1947} was performed with respect to each of the group distributions (note that since we have a total of 9 ``groups'' we are performing 9 different tests). 
+The MWUT was chosen as an appropriate statistical test because of the following considerations:
+\begin{enumerate}
+    \item It is a non-parametric test (note that the distributions are not clearly normal, exponential, etc).
+    \item The MWUT tests whether two samples have the same underlying distribution. Thus the test is more informative than just comparing a single statistic such as the mean or median. 
+\end{enumerate}
+The test was performed using the implementation provided by SciPy~\cite{scipy_2020,scipy_manual_2025}. 
+If we let $X_G$ be the distribution of similarity values computed with respect to all ligands active within a given protein kinase group $G$ (CK1, STE, etc), and $Y$ be the distribution of similarity values computed with respect to all other protein kinase ligands in the dataset\footnote{Note that this definition of $Y$ is not the same as the ``ALL KINASE'' distribution shown above, and is necessary to ensure that $X_G$ and $Y$ are independent}, then the test has the following null and alternative hypotheses~\cite{scipy_manual_2025}:\\
+\begin{adjustwidth}{2.5em}{0pt}
+$H_0$: The distribution underlying $X_G$ is not stochastically greater than the distribution underlying $Y$.\\\\
+$H_a$: The distribution underlying $X_G$ is stochastically greater than the distribution underlying $Y$.\\
+\end{adjustwidth}
+\noindent
+The test reports both a p-value and a U statistic. Since we're running multiple tests on different distributions, a Bonferonni correction is applied to all p-values to account for the multiple comparisons problem. 
+The U statistic is considered the maximum value of $U1$ and $U2$ below:
+\begin{equation}
+U_1 = n_1n_2 + \frac{n_1(n_1+1)}{2}- R_1 \\
+U_2 = n_1n_2 + \frac{n_2(n_2+1)}{2}- R_2 \\
+\end{equation}
+Where $n_1$ and $n_2$ are the number of observations (i.e., similarity values) in $X_G$ and $Y$ respectively, and $R_1$ and $R_2$ are the sums of the ranks in $X_G$ and $Y$ after ranking all values such that the smallest value obtains rank 1 and the largest rank $n_1 + n_2$. 
 
+The results from performing the MWUT are shown in Table~\ref{tab:mann_whitney_u}. 
+As can be seen from the p-values in the table, according to the MWUT there is reason to reject the null hypothesis ($H_0$) stated above for several of the protein kinase groups. 
+However, except for the CK1 group, the effect size is not very large (the extreme p-values are a result of the very large magnitude of $n_1$ and $n_2$). 
+In the case of the CK1 group, both a large effect size (e.g., the difference of medians) and significant p-value ($3.10 \times 10^{-11}$) were observed. 
+However, it should be noted that the number of ligands within the CK1 group is only 13, which in the wider context of chemistry + biology is unlikely to be a representative sample of all molecules which bind to CK1 proteins. 
+There are also additional limitations of this study, such as the fact that not all proteins are equally well-represented in the dataset, that prevents these results from being definitive. 
+These limitations will be discussed in more detail in Section~\ref{sec:discussion}. 
+\begin{table}[!ht]
+\centering
+\footnotesize
+\resizebox{\textwidth}{!}{
+\def\arraystretch{1.2}
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
+    \hline
+\textbf{Group} & \textbf{Group size ($n_1$)} & \textbf{Comparison size ($n_2$)} & \textbf{Group Median} & \textbf{Comparison Median} & \textbf{$U_1$} & \textbf{$U_2$} & \textbf{p-value} \\ \hline
+CK1 & 78 & 49,815,171 & 0.407 & 0.129 & $1.4002 \times 10^{13}$ & $1.6873 \times 10^{13}$ & $3.10 \times 10^{-11}$ \\ \hline
+STE & 90,1000 & 45,787,665 & 0.131 & 0.129 & $2.1731 \times 10^{12}$ & $1.9524 \times 10^{12}$ & $2.48 \times 10^{-169}$ \\ \hline
+ATYPICAL & 63,546 & 46,440,703 & 0.149 & 0.129 & $1.8801 \times 10^{12}$ & $1.0710 \times 10^{12}$ & $< 5 \times 10^{-324}$ \\ \hline
+CAMK & 17,7906 & 44,156,503 & 0.117 & 0.130 & $3.1847 \times 10^{12}$ & $4.6710 \times 10^{12}$ & $1.0$ \\ \hline
+AGC & 32,6836 & 42,186,705 & 0.116 & 0.131 & $5.4708 \times 10^{12}$ & $8.3173 \times 10^{12}$ & $1.0$ \\ \hline
+TKL & 327,645 & 42,177,520 & 0.133 & 0.129 & $7.3358 \times 10^{12}$ & $6.4834 \times 10^{12}$ & $< 5 \times 10^{-324}$ \\ \hline
+CMGC & 81,2175 & 38,014,840 & 0.122 & 0.130 & $1.4002 \times 10^{13}$ & $1.6873 \times 10^{13}$ & $1.0$ \\ \hline
+OTHER & 26,3901 & 42,943,278 & 0.127 & 0.129 & $5.5731 \times 10^{12}$ & $5.7596 \times 10^{12}$ & $1.0$ \\ \hline
+TK & 14,292,531 & 10,799,628 & 0.140 & 0.121 & $9.9533 \times 10^{13}$ & $5.4821 \times 10^{13}$ & $< 5 \times 10^{-324}$ \\ \hline
+\end{tabular}}
+\caption{Comparison of similarity distributions computed with respect to ligands active within particular protein kinase groups ($X_G$) vs the similarity distribution computed with respect to all other ligands in the dataset ($Y$). Shown p-values are calculated (with Bonferroni correction) from a Mann-Whitney U test (MWUT) where the alternative hypothesis is that the similarity values within the group are stochastically greater than the distribution of all similarity values. Note that although the MWUT is \textit{not} a test which considers the difference of medians, the median values are reported here to provide the reader with a more intuitive/familiar metric than the U statistic.}\label{tab:mann_whitney_u}
+\end{table}
 
-\subsection*{Enrichment}
+\subsection{Enrichment}\label{subsec:results_enrichment}
 
-\section*{Discussion}
+\section{Discussion}\label{sec:discussion}
 % include limitations here
+% note that one limitation in definition of both enrichment and (perhaps) distribution analysis is that there is the confounder of same assay similarity
+\section{Conclusion}
 
-\section*{Conclusion}
 
-
-\section*{Acknowledgement}
+\section{Acknowledgements}
 Much thanks to my advisor Dr.~Vincent Metzger for his guidance and input over the course of this project. I'd also like to thank Dr.~Jeremy Yang, Dr.~Cristian Bologa, and Dr.~Praveen Kumar for their feedback during weekly meetings over the course of the internship. Finally, I'd like to thank the   authors of ChEMBL DB~\cite{chembl_db_2023}.
 
 \bibliographystyle{plain}\bibliography{report}
