@@ -116,7 +116,7 @@ A Snakemake~\cite{snakemake_2021} workflow was developed to extract relevant ass
 As mentioned in the abstract, all code developed as part of this project can be found on GitHub: \href{https://github.com/Jack-42/ligandActivityAnalysis}{https://github.com/Jack-42/ligandActivityAnalysis}. 
 
 The set of active ligands and their relationship to specific human protein kinases was determined using data from single protein target binding assays in the ChEMBL database (version 35)~\cite{chembl_db_2023}. 
-In identifying appropriate assays and ligands, the criteria used by Pharos~\cite{pharos_2022} was enforced to ensure that (1) assays were high-quality and (2) a reasonable definition of ``active'' was applied~\cite{pharos_2022}. 
+In identifying appropriate assays and ligands, the criteria used by Pharos~\cite{pharos_2022} was enforced to ensure that (1) assays were high-quality and (2) a reasonable definition of ``active'' was applied. 
 These criteria include the following:
 \begin{itemize}
     \item Sample must have a pChEMBL value (i.e., a -Log M value)
@@ -132,7 +132,7 @@ In addition to the criteria from Pharos, other filters were also applied based o
 \begin{itemize}
     \item Remove assays where target was a variant/mutant (using implementation described by~\cite{landrum_riniker_2024}).
     \item Filtered out PAINS compounds to remove (some) false positives~\cite{baell_holloway_2010}.
-    \item Molecular weight of ligand must fall between [200, 900] Da. The particular range is based upon~\cite{filip_miljkovic_jurgen_bajorath_2018}. 
+    \item Molecular weight of ligand must fall between [200, 900] Da (this particular range is based upon~\cite{filip_miljkovic_jurgen_bajorath_2018}). 
 \end{itemize}
 
 The application of the criteria above to the ChEMBL database (version 35) resulted in a dataset described in Table~\ref{tab:1} below.
@@ -153,17 +153,28 @@ The application of the criteria above to the ChEMBL database (version 35) result
 In terms of ligand-target relationships, these were directly inferred from the assays (i.e., if a ligand was present in an active sample in an assay where protein X was specified as the target, then the ligand was considered as active against protein X). 
 ChEMBL provides classification information for protein targets, and this information was used to assign ligands to respective kinase group(s) such that a ligand is considered active within a protein kinase group if they were identified as an active within an assay targeting a protein belonging to the group. 
 It is perhaps worth noting that, under this definition, a single ligand can belong to more than one kinase group. 
-Most commonly this is because the ligand has multitarget activity (i.e., it is active against more than one target, and these targets span more than one group). 
+Most commonly this is because the ligand has multitarget activity (i.e., it is active against more than one target, and these targets span more than one group)\footnote{Within the dataset a total of $N=8036 \; (80.6\%)$ of ligands were active against only a single target, $N=1803 \; (18.0\%)$ were active against 2-4 targets, and $N=156 \; (1.6\%)$ were active against $\geq 5$ targets.}. 
 However, there are also some rare cases where proteins have been classified into more than a single group by ChEMBL. 
 For example, \href{https://www.ebi.ac.uk/chembl/explore/target/CHEMBL3906}{Ribosomal protein S6 kinase alpha 2} belongs to both the AGC and CAMK group according to ChEMBL. 
-In these exceptional cases an inclusive approach is taken such that the protein (and any of its active ligands) are considered part of both groups. 
+In these exceptional cases an inclusive approach is taken such that the protein (and any of its active ligands) are considered part of both groups.  
+A breakdown of the number of proteins, assays, and ligands belonging to each protein kinase group is provided in Figure~\ref{fig:group_atl_counts}. 
+
+
+\begin{figure}[H]
+    \centering 
+    \includegraphics[width=0.49\textwidth]{../figures/ntarget_by_group.png}
+    \includegraphics[width=0.49\textwidth]{../figures/nassay_by_group.png}
+    \includegraphics[width=0.49\textwidth]{../figures/nligand_by_group.png}
+    \caption{Number of unique protein targets (top left), assays (top right), and ligands (bottom) belonging to each protein kinase group in the dataset.}
+    \label{fig:group_atl_counts}
+\end{figure}
 
 After determining the set of ligands and their group relationships, Morgan fingerprints were computed using RDKit. 
 Tanimoto similarity coefficients were then computed between these 2D fingerprints. 
 These generated similarity values were clustered together using the ligand-group relationships described above and to generate the results described in the next section.
 \section*{Results}
 \subsection*{Distribution}
-
+To directly answer.
 Figure~\ref{violin_plot} provides distributions for the ${N\choose 2}$ similarity values per group ($N$ = number of ligands), as well as the ${9,995 \choose 2} = 49,945,015$ similarity values calcualted for all kinase ligands in the dataset. Table~\ref{results_table} provides additional statistics for each group, as well as results from a Mann-Whitney U test (MWUT).
 \begin{figure}[H]
     \centering
