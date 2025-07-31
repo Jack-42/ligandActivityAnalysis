@@ -5,6 +5,7 @@
 \usepackage{geometry}
 \usepackage{amsmath,amssymb}
 \usepackage{changepage}
+\usepackage[labelfont=bf]{caption}
 \geometry{
 a4paper,
 total={170mm,257mm},
@@ -65,8 +66,8 @@ A phylogenetic tree of the human kinome is shown in Figure~\ref{fig:fam_tree}. %
 The similarity property principle (SPP), has been enormously influential in the realm of medicinal chemistry~\cite{maggiora_vogt_stumpfe_bajorath_2013}. 
 According to the SPP, structurally-similar compounds often exhibit similar properties. 
 Among these properties is biological activity, such that similar compounds often demonstrate similar activity against identical biological targets (i.e., proteins in a majority of cases). 
-It is important to note that the definition of ``similar'' here is ambiguous, and can be measured in a myriad of ways. 
-Additionally, there exist so-called ``activity cliffs'', where a compound which shows high binding affinity (i.e., high activity) against a given target becomes completely ineffective after minor structural modifications~\cite{maggiora_vogt_stumpfe_bajorath_2013,filip_miljkovic_jurgen_bajorath_2018}. 
+It is important to note that the definition of “similar” here is ambiguous, and can be measured in a myriad of ways.
+Notable excceptions to the SPP are so-called ``activity cliffs'', where a compound which shows high binding affinity (i.e., high activity) against a given target becomes completely ineffective after minor structural modifications~\cite{maggiora_vogt_stumpfe_bajorath_2013,filip_miljkovic_jurgen_bajorath_2018}. 
 
 There are many computational methods for computing molecular similarity between two compounds~\cite{molsim_2024}. Similarity calculations depend both on how compounds are represented (e.g., using molecular graphs, fingerprint vectors, etc) and the particular metric used. 
 These similarity metrics typically report a value in the range 0 to 1, with values closer to 1 indicating a higher degree of structural similarity. In addition to computing pairwise similarity, dimensionality-reduction methods (e.g., U-MAP) can be used with clustering algorithms (e.g., K-means) to group together multiple structurally-similar compounds. Other clustering approaches make use of molecular scaffolds or other well-defined structural motifs.
@@ -217,7 +218,7 @@ The MWUT was chosen as an appropriate statistical test because of the following 
     \item The MWUT tests whether two samples have the same underlying distribution. Thus the test is more informative than just comparing a single statistic such as the mean or median. 
 \end{enumerate}
 The test was performed using the implementation provided by SciPy~\cite{scipy_2020,scipy_manual_2025}. 
-If we let $X_G$ be the distribution of similarity values computed with respect to all ligands active within a given protein kinase group $G$ (CK1, STE, etc), and $Y$ be the distribution of similarity values computed with respect to all other protein kinase ligands in the dataset\footnote{Note that this definition of $Y$ is not the same as the ``ALL KINASE'' distribution shown above, and is necessary to ensure that $X_G$ and $Y$ are independent}, then the test has the following null and alternative hypotheses~\cite{scipy_manual_2025}:\\
+If we let $X_G$ be the distribution of similarity values computed with respect to all ligands active within a given protein kinase group $G$ (CK1, STE, etc), and $Y$ be the distribution of similarity values computed with respect to all other protein kinase ligands in the dataset\footnote{Note that this definition of $Y$ is not the same as the ``ALL KINASE'' distribution shown above, and is necessary to ensure that $X_G$ and $Y$ are independent.}, then the test has the following null and alternative hypotheses~\cite{scipy_manual_2025}:\\
 \begin{adjustwidth}{2.5em}{0pt}
 $H_0$: The distribution underlying $X_G$ is not stochastically greater than the distribution underlying $Y$.\\\\
 $H_a$: The distribution underlying $X_G$ is stochastically greater than the distribution underlying $Y$.\\
@@ -226,8 +227,7 @@ $H_a$: The distribution underlying $X_G$ is stochastically greater than the dist
 The test reports both a p-value and a U statistic. Since we're running multiple tests on different distributions, a Bonferonni correction is applied to all p-values to account for the multiple comparisons problem. 
 The U statistic is considered the maximum value of $U1$ and $U2$ below:
 \begin{equation}
-U_1 = n_1n_2 + \frac{n_1(n_1+1)}{2}- R_1 \\
-U_2 = n_1n_2 + \frac{n_2(n_2+1)}{2}- R_2 \\
+U_1 = n_1n_2 + \frac{n_1(n_1+1)}{2}- R_1 \;\;\;\;\;\;\;\;\; U_2 = n_1n_2 + \frac{n_2(n_2+1)}{2}- R_2 \\
 \end{equation}
 Where $n_1$ and $n_2$ are the number of observations (i.e., similarity values) in $X_G$ and $Y$ respectively, and $R_1$ and $R_2$ are the sums of the ranks in $X_G$ and $Y$ after ranking all values such that the smallest value obtains rank 1 and the largest rank $n_1 + n_2$. 
 
@@ -260,12 +260,74 @@ TK & 14,292,531 & 10,799,628 & 0.140 & 0.121 & $9.9533 \times 10^{13}$ & $5.4821
 \end{table}
 
 \subsection{Enrichment}\label{subsec:results_enrichment}
+In addition to looking at the overall distribution of similarity values, the enrichment factor per group was also investigated.
+Enrichment is defined here as how much more likely it is (on average) that two ligands are active within the same group $G$ given that their similarity is higher than some threshold.  
+Prior research has looked at versions of this question before, and has found that when molecules are highly similar (Tanimoto similarity $\geq \; 0.85$) there is a $20-30\%$ chance they have similar biological activity~\cite{martin_kofron_traphagen_2002, chen_greenside_paik_sirota_hadley_butte_2015}. 
+These probabilities are higher than random chance, but certainly leave room for exceptions. 
+In the context of this work ``enrichment'' is defined according to equation~\ref{eq:enrichment}:
+\begin{equation}\label{eq:enrichment}
+    \footnotesize
+    \frac{P(\text{two ligands active within group G} \; | \; \text{similarity} > \text{threshold})}{P(\text{two ligands active within group G})}
+\end{equation}
+\noindent
+
+The motivation behind looking at enrichment is that, while there may not be a significant difference in the overall distributions of similarity values, one may still observe a higher-than-chance probability that two \textit{highly similar} ligands are active in the same group, and thus there may be a relationship between ligand similarity and intra-group activity at a sufficient threshold.  
+
+
+Figure~\ref{fig:enrichment_plot} shows the enrichment values observed for different protein kinase groups. As is seen from the figure, there is generally a positive correlation between similarity threshold and the enrichment factor. 
+However, there are good reasons to be skeptical of these results. 
+It is unexpected for there to be a strong relationship between similarity and enrichment within either the ``Atypical'' or ``Other'' group, since the proteins within these groups are not related to one another in a meaningful way. 
+Additionally, no relationship was observed for the TK group, even though these proteins are related in a meaningful way (they almost exclusively phosphorylate tyrosine residues). 
+These counter-intuitive results are likely due to an imperfect definition of enrichment being used, as well as the general study limitations described in Section~\ref{sec:discussion}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{../figures/enrichment_factor_by_group.png}
+    \caption{Plot of tanimoto similarity threshold (x-axis) vs enrichment (y-axis) by protein kinase group.}
+    \label{fig:enrichment_plot}
+\end{figure}
+
+The first issue with the definition of enrichment given above is that the magnitude of the enrichment factor depends upon the baseline probability of $P(\text{two ligands active within group G})$. 
+While it intuitevly makes sense to normalize the conditional probability by the baseline when looking at enrichment, in practice this results in the enrichment factor being inflated when the baseline probability is extremely low.  
+If one compares the baselines shown in Figure~\ref{fig:baseline_probs} to the observed enrichment values in Figure~\ref{fig:enrichment_plot}, they will see that there is a correlation between the baseline probability and observed enrichment values. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{../figures/baseline_prob_by_group.png}
+    \caption{Baseline probability $P(\text{two ligands active within group G})$ for each protein kinase group. Note that the probabilities here will not sum to 1 because the sum of these baselines merely represents the probabilty that two randomly chosen ligands are both active within the same group.}
+    \label{fig:baseline_probs}
+\end{figure}
+
+Another limitation is that the enrichment definition above does not account for ligands being active against the same target or within the same assay. 
+Thus, the enrichment factor could be high for a given group simply because highly similar ligands are more likely to be active against the same target or within the same assay, but not necessarily because they are more likely to be active against other proteins in the same group. 
+Figure~\ref{fig:enrichment_by_assay} shows that, while there is a significant spread in enrichment factor between individual assays, on average the enrichment factor exceeds $100$ when the similarity threshold is greater than $0.5$, and is close to $1000$ when the similarity threshold is greater than $0.8$. 
+Since the per-assay enrichment factor is so enormous (on average), it must be taken into account when considering the results above. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{../figures/enrichment_factor_by_assay.png}
+    \caption{Plot of tanimoto similarity threshold (x-axis) and enrichment factor (y-axis) by assay. Here only assays which had at least 2 active ligands were considered. Assays were clustered based on the group membership of targets. It is worth noting that the enrichment factor is equal to $0$ when none of the active ligands in the assay have a similarity value greater than the threshold, which is why such a large percentile range is observed in each plot. It is also why there is a notable drop in the mean enrichment factor at a threshold of $0.8$ for CK1 assays.}\label{fig:enrichment_by_assay}
+\end{figure}
 
 \section{Discussion}\label{sec:discussion}
 % include limitations here
 % note that one limitation in definition of both enrichment and (perhaps) distribution analysis is that there is the confounder of same assay similarity
-\section{Conclusion}
+\begin{itemize}
+    \item Not all protein targets are equally well-studied (see Figure~\ref{fig:assay_vs_ligand_plot})
+    \item Only considered Morgan fingerprints + Tanimoto coefficients when measuring ``similarity'' of ligands
+    \item Methodology does not directly account for differences in assay conditions, or the fact that even single proteins can have multiple binding sites
+    \item Data gathered from ChEMBL may not reflect global trends
+\end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../figures/assay_vs_ligand.png}
+    \caption{Scatter plots showing the number of assays (x-axis) and ligands (y-axis) for each protein belonging to each protein kinase group.}
+    \label{fig:assay_vs_ligand_plot}
+\end{figure}
+
+\section{Conclusion}
+Overall, this study found no clear relationship between 2D ligand similarity and protein kinase group activity. Although significant differences were observed for the CK1 group, given the limitations outlined above further study is necessary before accepting these results. 
 
 \section{Acknowledgements}
 Much thanks to my advisor Dr.~Vincent Metzger for his guidance and input over the course of this project. I'd also like to thank Dr.~Jeremy Yang, Dr.~Cristian Bologa, and Dr.~Praveen Kumar for their feedback during weekly meetings over the course of the internship. Finally, I'd like to thank the   authors of ChEMBL DB~\cite{chembl_db_2023}.
