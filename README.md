@@ -10,6 +10,8 @@ This work investigates whether there is a relationship between the 2D computatio
 ![alt text](https://github.com/Jack-42/ligandActivityAnalysis/blob/main/docs/figures/violin_plot.png)
 
 
+For more information see the [project report](https://github.com/Jack-42/ligandActivityAnalysis/blob/main/docs/report.pdf) and [poster](https://github.com/Jack-42/ligandActivityAnalysis/blob/main/docs/poster.pdf).
+
 ## Running Snakemake Workflow
 1. Setup PostgreSQL on your system by following [these instructions](#postgresql-setup)
 2. Install Conda environment: `conda env create -f environment.yaml`
